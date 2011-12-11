@@ -1,7 +1,7 @@
 Custom Grails XML and JSON Marshallers
 ======================================
 
-The development of this plugin has been inspired by [this blog post][http://jwicz.wordpress.com/2011/07/11/grails-custom-xml-marshaller/]
+The development of this plugin has been inspired by [this blog post](http://jwicz.wordpress.com/2011/07/11/grails-custom-xml-marshaller/)
 and a need to use custom marshallers - mostly by REST services whose responses must fulfill already defined formats.
 
 The Grails Converter plugin shipping within the Grails installation provides already
@@ -123,4 +123,5 @@ when XML element name should be custom, e.g.
 does not follow marshaller artifact convention, e.g.:
 
 	register CustomAXMLSerializer
+	
 	
