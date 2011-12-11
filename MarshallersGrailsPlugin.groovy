@@ -33,17 +33,22 @@ class MarshallersGrailsPlugin {
             "grails-app/views/error.gsp"
     ]
 
+    def scm = [url: "http://github.com/pedjak/grails-marshallers"]
+    def licence = "APACHE"
+    
     def artefacts = [ XmlMarshallerArtefactHandler, JsonMarshallerArtefactHandler ]
     
     def author = "Predrag Knezevic"
     def authorEmail = "pedjak@gmail.com"
     def title = "Easy Custom XML and JSON Marshalling for Grails Converters"
     def description = '''\\
-Brief description of the plugin.
+Easy registration and usage of custom XML and JSON marshallers supporting hierarchical configurations.
+
+Further documentation can be found <a href="http://github.com/pedjak/grails-marshallers">here</a>.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/marshallers"
+    def documentation = "http://github.com/pedjak/grails-marshallers"
 
     def doWithSpring = {
         // replace default convertersConfigurationInitializer from Converters plugin with ours
