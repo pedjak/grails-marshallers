@@ -1,4 +1,18 @@
-
+/*******************************************************************************
+ * Copyright 2011 Predrag Knezevic
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.grails.plugins.marshallers
 
 import grails.converters.JSON;
@@ -24,9 +38,7 @@ class ExtendedConvertersConfigurationInitializer extends ConvertersConfiguration
     protected def processGrailsConfigurations() {
         [xml: XML, json: JSON].each { type, converterClass ->
             def marshallerCfg = GrailsConfig.get("grails.plugins.marshallers.${type}")
-            if (marshallerCfg != null) {
-                processConfig(marshallerCfg, converterClass, type)
-            }
+            processConfig(marshallerCfg, converterClass, type)            
         }
     }
     
@@ -34,9 +46,11 @@ class ExtendedConvertersConfigurationInitializer extends ConvertersConfiguration
         def converterCfg = ConvertersConfigurationHolder.getConverterConfiguration(converterClass)
         def builder = new ConfigurationBuilder(type: type, applicationContext: applicationContext, cfg: converterCfg, log: LOG, converterClass: converterClass, cfgName: "default")
         builder.registerSpringMarshallers()
-        cfg.delegate = builder
-        cfg.resolveStrategy = Closure.DELEGATE_FIRST;
-        cfg.call()
+        if (cfg != null) {
+            cfg.delegate = builder
+            cfg.resolveStrategy = Closure.DELEGATE_FIRST;
+            cfg.call()
+        }
     }
 }
 
