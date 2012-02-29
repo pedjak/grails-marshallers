@@ -13,53 +13,95 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
+import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller;
+import org.grails.plugins.marshallers.GenericDomainClassXMLMarshaller;
 import org.grails.plugins.marshallers.XmlMarshallerArtefactHandler
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
+import org.grails.plugins.marshallers.config.MarshallingConfig;
+import org.grails.plugins.marshallers.config.MarshallingConfigBuilder;
+import grails.converters.XML;
+import grails.converters.JSON;
+
 
 class MarshallersGrailsPlugin {
-    // the plugin version
-    def version = "0.1"
-    // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.1 > *"
-    
-    def loadAfter = ['converters']
-    
-    
-    // the other plugins this plugin depends on
-    def dependsOn = [:]
-    // resources that are excluded from plugin packaging
-    def pluginExcludes = [
-            "grails-app/views/error.gsp"
-    ]
+	// the plugin version
+	def version = "0.1"
+	// the version or versions of Grails the plugin is designed for
+	def grailsVersion = "1.1 > *"
 
-    def scm = [url: "http://github.com/pedjak/grails-marshallers"]
-    def licence = "APACHE"
-    
-    def artefacts = [ XmlMarshallerArtefactHandler, JsonMarshallerArtefactHandler ]
-    
-    def author = "Predrag Knezevic"
-    def authorEmail = "pedjak@gmail.com"
-    def title = "Easy Custom XML and JSON Marshalling for Grails Converters"
-    def description = '''\\
+	def loadAfter = ['converters']
+
+
+	// the other plugins this plugin depends on
+	def dependsOn = [:]
+	// resources that are excluded from plugin packaging
+	def pluginExcludes = [
+		"grails-app/views/error.gsp"
+	]
+
+	def scm = [url: "http://github.com/pedjak/grails-marshallers"]
+	def licence = "APACHE"
+
+	def artefacts = [
+		XmlMarshallerArtefactHandler,
+		JsonMarshallerArtefactHandler
+	]
+
+	def author = "Predrag Knezevic"
+	def authorEmail = "pedjak@gmail.com"
+	def title = "Easy Custom XML and JSON Marshalling for Grails Converters"
+	def description = '''\\
 Easy registration and usage of custom XML and JSON marshallers supporting hierarchical configurations.
 
 Further documentation can be found <a href="http://github.com/pedjak/grails-marshallers">here</a>.
 '''
 
-    // URL to the plugin's documentation
-    def documentation = "http://github.com/pedjak/grails-marshallers"
+	// URL to the plugin's documentation
+	def documentation = "http://github.com/pedjak/grails-marshallers"
 
-    def doWithSpring = {
-        // replace default convertersConfigurationInitializer from Converters plugin with ours
-        convertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
-        ["xml", "json"].each { type ->
-            application."${type}MarshallerClasses".each { marshallerClass ->
-                "${marshallerClass.fullName}"(marshallerClass.clazz) { bean ->
-                    bean.autowire = "byName"
-                }
-            }
-        }
-    }
-        
+	def doWithSpring = {
+
+		// replace default convertersConfigurationInitializer from Converters plugin with ours
+		convertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
+		["xml", "json"].each { type ->
+			application."${type}MarshallerClasses".each { marshallerClass ->
+				"${marshallerClass.fullName}"(marshallerClass.clazz) { bean ->
+					bean.autowire = "byName"
+				}
+			}
+		}
+	}
+
+	def doWithDynamicMethods={appCtx->
+		MarshallingConfigBuilder delegate=new MarshallingConfigBuilder();
+		def namedConfigs=new HashSet<String>();
+		application.domainClasses.each{
+			def mc=GCU.getStaticPropertyValue(it.clazz,'marshalling');
+			if(mc){
+				mc.setDelegate(delegate)
+				mc.call()
+				MarshallingConfig c=mc.config;
+				['xml', 'json'].each {type->	namedConfigs<< c.getConfigNamesForContentType(type)}
+			}
+		}
+		println namedConfigs.flatten()
+		namedConfigs.flatten().each{name->
+			if(name=='default'){
+				XML.registerObjectMarshaller(new GenericDomainClassXMLMarshaller('default'));
+				JSON.registerObjectMarshaller(new GenericDomainClassJSONMarshaller('default'));
+			}else{
+				XML.createNamedConfig(name) {
+					it.registerObjectMarshaller(new GenericDomainClassXMLMarshaller(name));
+				}
+				JSON.createNamedConfig(name) {
+					it.registerObjectMarshaller(new GenericDomainClassJSONMarshaller(name));
+				}
+			}
+
+		}
+
+	}
+
 }
