@@ -8,6 +8,7 @@ import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigu
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException;
 import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller;
 import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
+import org.codehaus.groovy.grails.commons.GrailsDomainClass;
 import org.codehaus.groovy.grails.commons.GrailsDomainConfigurationUtil;
 
 import org.codehaus.groovy.grails.web.converters.marshaller.json.DomainClassMarshaller;
@@ -28,6 +29,9 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 	}
 
 	@Override
-	public void marshalObject(Object object, XML converter)	throws ConverterException {
+	public void marshalObject(Object value, XML converter)	throws ConverterException {
+		Class clazz = value.getClass();
+		GrailsDomainClass domainClass = ConverterUtil.getDomainClass(clazz.getName());
+		
 	}
 }
