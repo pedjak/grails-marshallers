@@ -14,6 +14,8 @@ class MarshallingConfig {
 		return config[type]!=null?config[type].collect {key,value->key}:[]
 	}
 
+
+
 	static def getForClass(Class domainClass){
 		def mc=GCU.getStaticPropertyValue(domainClass,'marshalling');
 		MarshallingConfigBuilder delegate=new MarshallingConfigBuilder();
