@@ -3,6 +3,7 @@ import grails.converters.JSON
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.groovy.grails.support.proxy.ProxyHandler;
 import org.codehaus.groovy.grails.web.converters.ConverterUtil;
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder;
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException;
@@ -15,10 +16,12 @@ import org.codehaus.groovy.grails.web.converters.marshaller.json.DomainClassMars
 class GenericDomainClassJSONMarshaller implements ObjectMarshaller<JSON> {
 	private static Log LOG = LogFactory.getLog(GenericDomainClassJSONMarshaller.class);
 	private String configName;
+	private ProxyHandler proxyHandler;
 
-	public GenericDomainClassJSONMarshaller(String configName){
+	public GenericDomainClassJSONMarshaller(String configName,ProxyHandler proxyHandler){
 		LOG.debug("Registered json domain class marshaller for $configName");
 		this.configName=configName;
+		this.proxyHandler=proxyHandler;
 	}
 
 	@Override

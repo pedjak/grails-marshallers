@@ -14,6 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
+import org.codehaus.groovy.grails.support.proxy.DefaultProxyHandler;
+import org.codehaus.groovy.grails.support.proxy.ProxyHandler;
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
 import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller;
 import org.grails.plugins.marshallers.GenericDomainClassXMLMarshaller;
@@ -75,6 +77,7 @@ Further documentation can be found <a href="http://github.com/pedjak/grails-mars
 	}
 
 	def doWithDynamicMethods={appCtx->
+		ProxyHandler proxyHandler = appCtx.getBean(ProxyHandler.class);
 		MarshallingConfigBuilder delegate=new MarshallingConfigBuilder();
 		def namedConfigs=new HashSet<String>();
 		application.domainClasses.each{
@@ -82,26 +85,27 @@ Further documentation can be found <a href="http://github.com/pedjak/grails-mars
 			if(mc){
 				mc.setDelegate(delegate)
 				mc.call()
-				MarshallingConfig c=mc.config;
-				['xml', 'json'].each {type->	namedConfigs<< c.getConfigNamesForContentType(type)}
+				MarshallingConfig c=new MarshallingConfig(config:delegate.config);
+				['xml', 'json'].each {type->namedConfigs<< c.getConfigNamesForContentType(type)}
 			}
 		}
 		println namedConfigs.flatten()
 		namedConfigs.flatten().each{name->
 			if(name=='default'){
-				XML.registerObjectMarshaller(new GenericDomainClassXMLMarshaller('default'));
-				JSON.registerObjectMarshaller(new GenericDomainClassJSONMarshaller('default'));
+				XML.registerObjectMarshaller(new GenericDomainClassXMLMarshaller('default',proxyHandler));
+				JSON.registerObjectMarshaller(new GenericDomainClassJSONMarshaller('default',proxyHandler));
 			}else{
 				XML.createNamedConfig(name) {
-					it.registerObjectMarshaller(new GenericDomainClassXMLMarshaller(name));
+					it.registerObjectMarshaller(new GenericDomainClassXMLMarshaller(name,proxyHandler));
 				}
 				JSON.createNamedConfig(name) {
-					it.registerObjectMarshaller(new GenericDomainClassJSONMarshaller(name));
+					it.registerObjectMarshaller(new GenericDomainClassJSONMarshaller(name,proxyHandler));
 				}
 			}
 
 		}
 
 	}
+
 
 }

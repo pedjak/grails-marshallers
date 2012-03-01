@@ -12,11 +12,18 @@ class MarshallingConfigBuilderTests extends GrailsUnitTestCase {
 
 	static def testConfig={
 		xml{
-			'default' elementName:'elName',attributes:['some', 'some1'], ignore:['ig', 'big']
-			named attributes:['some', 'some1'], ignore:['ig', 'big']
+			'default' {
+				elementName 'elName'
+				attributes 'some', 'some1'
+				ignore 'ig', 'big'
+			}
+			named {
+				attributes 'some', 'some1'
+				ignore 'ig', 'big'
+			}
 		}
 		json {
-			'default' ignore:['some', 'some1']
+			'default'{ ignore 'some', 'some1' }
 		}
 	}
 
@@ -32,19 +39,15 @@ class MarshallingConfigBuilderTests extends GrailsUnitTestCase {
 	void testBuilder() {
 		testConfig.setDelegate(builder)
 		testConfig.call()
-		def c= builder.config
+		def c= new MarshallingConfig(config: builder.config);
+		println c.config;
 		assertEquals(c.getConfig('xml','default').elementName,'elName')
+		assertNull(c.getConfig('xml','named').elementName)
 		assertEquals(c.getConfig('xml','default').attributes.size(),2)
-		assertNull(c.getConfig('some','default'))
-		assertNull(c.getConfig('xml', 'some'))
+		assertEquals(c.getConfig('some','default').size(),0)
+		assertEquals(c.getConfig('xml', 'some').size(),0)
 		assertEquals(c.getConfigNamesForContentType('some').size(),0)
 		assertEquals(c.getConfigNamesForContentType('xml').size(),2)
 		assertEquals(c.getConfigNamesForContentType('json').size(),1)
-	}
-
-	void test(){
-		def c=GenericDomainClassJSONMarshaller.class.getDeclaredConstructor(String.class);
-		def o=c.newInstance('default');
-		println o;
 	}
 }
