@@ -45,11 +45,14 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 	@Override
 	public boolean supports(Object object) {
 		def clazz=object.getClass();
-		return ConverterUtil.isDomainClass(clazz) && GCU.getStaticPropertyValue(clazz,'marshalling');
+		boolean s= ConverterUtil.isDomainClass(clazz) && GCU.getStaticPropertyValue(clazz,'marshalling');
+		LOG.debug("Support for $object  is $s")
+		return s;
 	}
 
 	@Override
 	public void marshalObject(Object value, XML xml)	throws ConverterException {
+		LOG.debug("Marshalling of $value started")
 		Class clazz = value.getClass();
 		GrailsDomainClass domainClass = ConverterUtil.getDomainClass(clazz.getName());
 		def mc=MarshallingConfig.getForClass(clazz).getConfig('xml',configName);
@@ -66,6 +69,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 		}
 		if(mc.attribute){
 			mc.attribute.each{prop->
+				LOG.debug("Trying to write field as xml attribute: $prop on $value")
 				Object val = beanWrapper.getPropertyValue(prop);
 				xml.attribute(prop, String.valueOf(val))
 			}
@@ -75,6 +79,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 
 		for (GrailsDomainClassProperty property : properties) {
 			if(!isIn(mc,'ignore',property.getName()) && !isIn(mc,'attribute',property.getName())){
+				LOG.debug("Trying to write field as xml element: $property.name on $value")
 				writeElement(xml, property, beanWrapper);
 			}
 		}
