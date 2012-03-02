@@ -19,6 +19,7 @@ import org.codehaus.groovy.grails.support.proxy.ProxyHandler;
 import org.codehaus.groovy.grails.web.converters.ConverterUtil;
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder;
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException;
+import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller;
 import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller;
 import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
 import org.codehaus.groovy.grails.commons.GrailsDomainClass;
@@ -30,7 +31,7 @@ import org.grails.plugins.marshallers.config.MarshallingConfig;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
-class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
+class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAwareMarshaller {
 	private static Log LOG = LogFactory.getLog(GenericDomainClassXMLMarshaller.class);
 	private String configName;
 	private final boolean includeVersion=true;
@@ -71,7 +72,9 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 			mc.attribute.each{prop->
 				LOG.debug("Trying to write field as xml attribute: $prop on $value")
 				Object val = beanWrapper.getPropertyValue(prop);
-				xml.attribute(prop, String.valueOf(val))
+				if(val!=null){
+					xml.attribute(prop, String.valueOf(val))
+				}
 			}
 		}
 
@@ -80,13 +83,13 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 		for (GrailsDomainClassProperty property : properties) {
 			if(!isIn(mc,'ignore',property.getName()) && !isIn(mc,'attribute',property.getName())){
 				LOG.debug("Trying to write field as xml element: $property.name on $value")
-				writeElement(xml, property, beanWrapper);
+				writeElement(xml, property, beanWrapper,mc);
 			}
 		}
 	}
 
 
-	private writeElement(XML xml, GrailsDomainClassProperty property, BeanWrapper beanWrapper) {
+	private writeElement(XML xml, GrailsDomainClassProperty property, BeanWrapper beanWrapper,mc) {
 		xml.startNode(property.getName());
 		if (!property.isAssociation()) {
 			// Write non-relation property
@@ -95,26 +98,8 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 		}
 		else {
 			Object referenceObject = beanWrapper.getPropertyValue(property.getName());
-			if (isRenderDomainClassRelations()) {
-				if (referenceObject != null) {
-					referenceObject = proxyHandler.unwrapIfProxy(referenceObject);
-					if (referenceObject instanceof SortedMap) {
-						referenceObject = new TreeMap((SortedMap) referenceObject);
-					}
-					else if (referenceObject instanceof SortedSet) {
-						referenceObject = new TreeSet((SortedSet) referenceObject);
-					}
-					else if (referenceObject instanceof Set) {
-						referenceObject = new HashSet((Set) referenceObject);
-					}
-					else if (referenceObject instanceof Map) {
-						referenceObject = new HashMap((Map) referenceObject);
-					}
-					else if (referenceObject instanceof Collection) {
-						referenceObject = new ArrayList((Collection) referenceObject);
-					}
-					xml.convertAnother(referenceObject);
-				}
+			if (isIn(mc,'deep',property.getName())) {
+				renderDeep(referenceObject, xml)
 			}
 			else {
 				if (referenceObject != null) {
@@ -155,6 +140,28 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 		}
 		xml.end()
 	}
+
+	private void renderDeep(ArrayList referenceObject, XML xml) {
+		if (referenceObject != null) {
+			referenceObject = proxyHandler.unwrapIfProxy(referenceObject);
+			if (referenceObject instanceof SortedMap) {
+				referenceObject = new TreeMap((SortedMap) referenceObject);
+			}
+			else if (referenceObject instanceof SortedSet) {
+				referenceObject = new TreeSet((SortedSet) referenceObject);
+			}
+			else if (referenceObject instanceof Set) {
+				referenceObject = new HashSet((Set) referenceObject);
+			}
+			else if (referenceObject instanceof Map) {
+				referenceObject = new HashMap((Map) referenceObject);
+			}
+			else if (referenceObject instanceof Collection) {
+				referenceObject = new ArrayList((Collection) referenceObject);
+			}
+			xml.convertAnother(referenceObject);
+		}
+	}
 	protected void asShortObject(Object refObj, XML xml, GrailsDomainClassProperty idProperty,
 	@SuppressWarnings("unused") GrailsDomainClass referencedDomainClass) throws ConverterException {
 		Object idValue;
@@ -172,11 +179,16 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML> {
 		xml.attribute("id",String.valueOf(idValue));
 	}
 
-	protected boolean isRenderDomainClassRelations() {
-		return false;
-	}
 	private boolean isIn(config,configName,fieldName){
 		return config[configName]!=null?config[configName].find{it==fieldName}!=null:false;
 
+	}
+
+	@Override
+	public String getElementName(Object value) {
+		Class clazz = value.getClass();
+		GrailsDomainClass domainClass = ConverterUtil.getDomainClass(clazz.getName());
+		def mc=MarshallingConfig.getForClass(clazz).getConfig('xml',configName);
+		return mc.elementName?:domainClass.logicalPropertyName;
 	}
 }
