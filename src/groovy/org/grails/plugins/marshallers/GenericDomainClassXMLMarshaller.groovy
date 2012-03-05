@@ -82,8 +82,14 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 
 		for (GrailsDomainClassProperty property : properties) {
 			if(!isIn(mc,'ignore',property.getName()) && !isIn(mc,'attribute',property.getName())){
-				LOG.debug("Trying to write field as xml element: $property.name on $value")
-				writeElement(xml, property, beanWrapper,mc);
+				def serializers=mc?.serializer
+				if(serializers && serializers[property.name]){
+					Object val = beanWrapper.getPropertyValue(property.getName());
+					serializers[property.name].call(val,xml)
+				}else{
+					LOG.debug("Trying to write field as xml element: $property.name on $value")
+					writeElement(xml, property, beanWrapper,mc);
+				}
 			}
 		}
 	}
@@ -166,12 +172,10 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 	@SuppressWarnings("unused") GrailsDomainClass referencedDomainClass) throws ConverterException {
 		Object idValue;
 		if(proxyHandler instanceof EntityProxyHandler) {
-
 			idValue = ((EntityProxyHandler) proxyHandler).getProxyIdentifier(refObj);
 			if(idValue == null) {
 				idValue = new BeanWrapperImpl(refObj).getPropertyValue(idProperty.getName());
 			}
-
 		}
 		else {
 			idValue = new BeanWrapperImpl(refObj).getPropertyValue(idProperty.getName());

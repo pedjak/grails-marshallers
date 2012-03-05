@@ -20,6 +20,9 @@ class MarshallingConfigBuilderTests extends GrailsUnitTestCase {
 			named {
 				attributes 'some', 'some1'
 				ignore 'ig', 'big'
+				serializer {
+					taxonomies {val,xml-> println val }
+				}
 			}
 		}
 		json {
@@ -43,6 +46,7 @@ class MarshallingConfigBuilderTests extends GrailsUnitTestCase {
 		println c.config;
 		assertEquals(c.getConfig('xml','default').elementName,'elName')
 		assertNull(c.getConfig('xml','named').elementName)
+		assertTrue(c.getConfig('xml','named').serializer.taxonomies instanceof Closure)
 		assertEquals(c.getConfig('xml','default').attributes.size(),2)
 		assertEquals(c.getConfig('some','default').size(),0)
 		assertEquals(c.getConfig('xml', 'some').size(),0)
