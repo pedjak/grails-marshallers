@@ -66,14 +66,14 @@ Further documentation can be found <a href="http://github.com/pedjak/grails-mars
 	def doWithSpring = {
 
 		// replace default convertersConfigurationInitializer from Converters plugin with ours
-		convertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
+	/*	convertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
 		["xml", "json"].each { type ->
 			application."${type}MarshallerClasses".each { marshallerClass ->
 				"${marshallerClass.fullName}"(marshallerClass.clazz) { bean ->
 					bean.autowire = "byName"
 				}
 			}
-		}
+		}*/
 	}
 
 	def doWithDynamicMethods={appCtx->
@@ -89,7 +89,6 @@ Further documentation can be found <a href="http://github.com/pedjak/grails-mars
 				['xml', 'json'].each {type->namedConfigs<< c.getConfigNamesForContentType(type)}
 			}
 		}
-		println namedConfigs.flatten()
 		namedConfigs.flatten().each{name->
 			if(name=='default'){
 				XML.registerObjectMarshaller(new GenericDomainClassXMLMarshaller('default',proxyHandler));

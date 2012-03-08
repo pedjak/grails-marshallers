@@ -34,7 +34,7 @@ import org.springframework.beans.BeanWrapperImpl;
 class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAwareMarshaller {
 	private static Log LOG = LogFactory.getLog(GenericDomainClassXMLMarshaller.class);
 	private String configName;
-	private final boolean includeVersion=true;
+	private final boolean includeVersion=false;
 	private ProxyHandler proxyHandler;
 
 	public GenericDomainClassXMLMarshaller(String configName, ProxyHandler proxyHandler){
@@ -58,11 +58,17 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 		GrailsDomainClass domainClass = ConverterUtil.getDomainClass(clazz.getName());
 		def mc=MarshallingConfig.getForClass(clazz).getConfig('xml',configName);
 		BeanWrapper beanWrapper = new BeanWrapperImpl(value);
+		if(mc.identifier){
+			mc.identifier.each{
+				def	val = beanWrapper.getPropertyValue(it);
+				xml.attribute(it,String.valueOf(val));
+			}
+		}else{
+			GrailsDomainClassProperty id = domainClass.getIdentifier();
+			Object idValue = beanWrapper.getPropertyValue(id.getName());
 
-		GrailsDomainClassProperty id = domainClass.getIdentifier();
-		Object idValue = beanWrapper.getPropertyValue(id.getName());
-
-		if (idValue != null) xml.attribute("id", String.valueOf(idValue));
+			if (idValue != null) xml.attribute("id", String.valueOf(idValue));
+		}
 
 		if (includeVersion) {
 			Object versionValue = beanWrapper.getPropertyValue(domainClass.getVersion().getName());
@@ -81,7 +87,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 		GrailsDomainClassProperty[] properties = domainClass.getPersistentProperties();
 
 		for (GrailsDomainClassProperty property : properties) {
-			if(!isIn(mc,'ignore',property.getName()) && !isIn(mc,'attribute',property.getName())){
+			if(!isIn(mc,'identifier',property.getName()) && !isIn(mc,'ignore',property.getName()) && !isIn(mc,'attribute',property.getName())){
 				def serializers=mc?.serializer
 				if(serializers && serializers[property.name]){
 					Object val = beanWrapper.getPropertyValue(property.getName());
@@ -147,7 +153,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 		xml.end()
 	}
 
-	private void renderDeep(ArrayList referenceObject, XML xml) {
+	private void renderDeep(referenceObject, XML xml) {
 		if (referenceObject != null) {
 			referenceObject = proxyHandler.unwrapIfProxy(referenceObject);
 			if (referenceObject instanceof SortedMap) {
@@ -168,19 +174,31 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 			xml.convertAnother(referenceObject);
 		}
 	}
+
+
+
 	protected void asShortObject(Object refObj, XML xml, GrailsDomainClassProperty idProperty,
 	@SuppressWarnings("unused") GrailsDomainClass referencedDomainClass) throws ConverterException {
-		Object idValue;
-		if(proxyHandler instanceof EntityProxyHandler) {
-			idValue = ((EntityProxyHandler) proxyHandler).getProxyIdentifier(refObj);
-			if(idValue == null) {
+		def refClassConfig=MarshallingConfig.getForClass(referencedDomainClass.clazz)?.getConfig('xml',configName);
+		if(refClassConfig && refClassConfig.identifier){
+			def wrapper=new BeanWrapperImpl(refObj);
+			refClassConfig.identifier.each{
+				def	val = wrapper.getPropertyValue(it);
+				xml.attribute(it,String.valueOf(val));
+			}
+		}else{
+			Object idValue;
+			if(proxyHandler instanceof EntityProxyHandler) {
+				idValue = ((EntityProxyHandler) proxyHandler).getProxyIdentifier(refObj);
+				if(idValue == null) {
+					idValue = new BeanWrapperImpl(refObj).getPropertyValue(idProperty.getName());
+				}
+			}
+			else {
 				idValue = new BeanWrapperImpl(refObj).getPropertyValue(idProperty.getName());
 			}
+			xml.attribute("id",String.valueOf(idValue));
 		}
-		else {
-			idValue = new BeanWrapperImpl(refObj).getPropertyValue(idProperty.getName());
-		}
-		xml.attribute("id",String.valueOf(idValue));
 	}
 
 	private boolean isIn(config,configName,fieldName){

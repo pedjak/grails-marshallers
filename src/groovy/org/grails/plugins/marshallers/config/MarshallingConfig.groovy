@@ -18,10 +18,13 @@ class MarshallingConfig {
 
 	static def getForClass(Class domainClass){
 		def mc=GCU.getStaticPropertyValue(domainClass,'marshalling');
-		MarshallingConfigBuilder delegate=new MarshallingConfigBuilder();
-		mc.setDelegate(delegate)
-		mc.call()
-		MarshallingConfig c=new MarshallingConfig(config:delegate.config);
-		return c;
+		if(mc){
+			MarshallingConfigBuilder delegate=new MarshallingConfigBuilder();
+			mc.setDelegate(delegate)
+			mc.call()
+			MarshallingConfig c=new MarshallingConfig(config:delegate.config);
+			return c;
+		}
+		return null;
 	}
 }
