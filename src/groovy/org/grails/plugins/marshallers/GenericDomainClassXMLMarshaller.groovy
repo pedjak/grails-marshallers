@@ -58,18 +58,19 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 		GrailsDomainClass domainClass = ConverterUtil.getDomainClass(clazz.getName());
 		def mc=MarshallingConfig.getForClass(clazz).getConfig('xml',configName);
 		BeanWrapper beanWrapper = new BeanWrapperImpl(value);
-		if(mc.identifier){
-			mc.identifier.each{
-				def	val = beanWrapper.getPropertyValue(it);
-				xml.attribute(it,String.valueOf(val));
+		if(mc.ignoreIdentifier==null || !mc.ignoreIdentifier){
+			if(mc.identifier){
+				mc.identifier.each{
+					def	val = beanWrapper.getPropertyValue(it);
+					xml.attribute(it,String.valueOf(val));
+				}
+			}else{
+				GrailsDomainClassProperty id = domainClass.getIdentifier();
+				Object idValue = beanWrapper.getPropertyValue(id.getName());
+
+				if (idValue != null) xml.attribute("id", String.valueOf(idValue));
 			}
-		}else{
-			GrailsDomainClassProperty id = domainClass.getIdentifier();
-			Object idValue = beanWrapper.getPropertyValue(id.getName());
-
-			if (idValue != null) xml.attribute("id", String.valueOf(idValue));
 		}
-
 		if (includeVersion) {
 			Object versionValue = beanWrapper.getPropertyValue(domainClass.getVersion().getName());
 			xml.attribute("version", String.valueOf(versionValue));
