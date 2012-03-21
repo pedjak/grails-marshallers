@@ -60,14 +60,17 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 		BeanWrapper beanWrapper = new BeanWrapperImpl(value);
 		if(mc.ignoreIdentifier==null || !mc.ignoreIdentifier){
 			if(mc.identifier){
-				mc.identifier.each{
-					def	val = beanWrapper.getPropertyValue(it);
-					xml.attribute(it,String.valueOf(val));
+				if(mc.identifier.size()==1 && mc.identifier[0] instanceof Closure){
+					mc.identifier[0].call(value,xml)
+				}else{
+					mc.identifier.each{
+						def	val = beanWrapper.getPropertyValue(it);
+						xml.attribute(it,String.valueOf(val));
+					}
 				}
 			}else{
 				GrailsDomainClassProperty id = domainClass.getIdentifier();
 				Object idValue = beanWrapper.getPropertyValue(id.getName());
-
 				if (idValue != null) xml.attribute("id", String.valueOf(idValue));
 			}
 		}
@@ -97,6 +100,13 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 					LOG.debug("Trying to write field as xml element: $property.name on $value")
 					writeElement(xml, property, beanWrapper,mc);
 				}
+			}
+		}
+		if(mc.virtual){
+			mc.virtual.each{prop,callable->
+				xml.startNode(prop)
+				mc.virtual[prop].call(value,xml)
+				xml.end()
 			}
 		}
 	}
@@ -182,11 +192,16 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 	@SuppressWarnings("unused") GrailsDomainClass referencedDomainClass) throws ConverterException {
 		def refClassConfig=MarshallingConfig.getForClass(referencedDomainClass.clazz)?.getConfig('xml',configName);
 		if(refClassConfig && refClassConfig.identifier){
-			def wrapper=new BeanWrapperImpl(refObj);
-			refClassConfig.identifier.each{
-				def	val = wrapper.getPropertyValue(it);
-				xml.attribute(it,String.valueOf(val));
+			if(refClassConfig.identifier.size()==1 && refClassConfig.identifier[0] instanceof Closure){
+				refClassConfig.identifier[0].call(refObj,xml)
+			}else{
+				def wrapper=new BeanWrapperImpl(refObj);
+				refClassConfig.identifier.each{
+					def	val = wrapper.getPropertyValue(it);
+					xml.attribute(it,String.valueOf(val));
+				}
 			}
+
 		}else{
 			Object idValue;
 			if(proxyHandler instanceof EntityProxyHandler) {
