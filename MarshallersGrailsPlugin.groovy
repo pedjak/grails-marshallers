@@ -64,47 +64,18 @@ Further documentation can be found <a href="http://github.com/pedjak/grails-mars
 	def documentation = "http://github.com/pedjak/grails-marshallers"
 
 	def doWithSpring = {
-
 		// replace default convertersConfigurationInitializer from Converters plugin with ours
-	/*	convertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
+		convertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
 		["xml", "json"].each { type ->
 			application."${type}MarshallerClasses".each { marshallerClass ->
 				"${marshallerClass.fullName}"(marshallerClass.clazz) { bean ->
 					bean.autowire = "byName"
 				}
 			}
-		}*/
+		}
 	}
 
-	def doWithDynamicMethods={appCtx->
-		ProxyHandler proxyHandler = appCtx.getBean(ProxyHandler.class);
-		MarshallingConfigBuilder delegate=new MarshallingConfigBuilder();
-		def namedConfigs=new HashSet<String>();
-		application.domainClasses.each{
-			def mc=GCU.getStaticPropertyValue(it.clazz,'marshalling');
-			if(mc){
-				mc.setDelegate(delegate)
-				mc.call()
-				MarshallingConfig c=new MarshallingConfig(config:delegate.config);
-				['xml', 'json'].each {type->namedConfigs<< c.getConfigNamesForContentType(type)}
-			}
-		}
-		namedConfigs.flatten().each{name->
-			if(name=='default'){
-				XML.registerObjectMarshaller(new GenericDomainClassXMLMarshaller('default',proxyHandler));
-				JSON.registerObjectMarshaller(new GenericDomainClassJSONMarshaller('default',proxyHandler));
-			}else{
-				XML.createNamedConfig(name) {
-					it.registerObjectMarshaller(new GenericDomainClassXMLMarshaller(name,proxyHandler));
-				}
-				JSON.createNamedConfig(name) {
-					it.registerObjectMarshaller(new GenericDomainClassJSONMarshaller(name,proxyHandler));
-				}
-			}
 
-		}
-
-	}
 
 
 }

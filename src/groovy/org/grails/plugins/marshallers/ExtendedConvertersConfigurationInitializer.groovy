@@ -18,10 +18,14 @@ package org.grails.plugins.marshallers
 import grails.converters.JSON;
 import grails.converters.XML;
 import grails.util.GrailsConfig;
-
+import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.support.proxy.ProxyHandler
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder;
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer;
 import org.codehaus.groovy.grails.web.converters.configuration.DefaultConverterConfiguration;
+import org.grails.plugins.marshallers.config.MarshallingConfig
+import org.grails.plugins.marshallers.config.MarshallingConfigBuilder
 
 /**
  * @author Predrag Knezevic
@@ -29,28 +33,58 @@ import org.codehaus.groovy.grails.web.converters.configuration.DefaultConverterC
  */
 class ExtendedConvertersConfigurationInitializer extends ConvertersConfigurationInitializer {
 
-    @Override
-    public void initialize() {
-        super.initialize()
-        processGrailsConfigurations()
-    }
+	
 
-    protected def processGrailsConfigurations() {
-        [xml: XML, json: JSON].each { type, converterClass ->
-            def marshallerCfg = GrailsConfig.get("grails.plugins.marshallers.${type}")
-            processConfig(marshallerCfg, converterClass, type)            
-        }
-    }
-    
-    public void processConfig(Closure cfg, Class converterClass, type) {
-        def converterCfg = ConvertersConfigurationHolder.getConverterConfiguration(converterClass)
-        def builder = new ConfigurationBuilder(type: type, applicationContext: applicationContext, cfg: converterCfg, log: LOG, converterClass: converterClass, cfgName: "default")
-        builder.registerSpringMarshallers()
-        if (cfg != null) {
-            cfg.delegate = builder
-            cfg.resolveStrategy = Closure.DELEGATE_FIRST;
-            cfg.call()
-        }
-    }
+	@Override
+	public void initialize() {
+		super.initialize()
+		processGrailsConfigurations()
+	}
+
+	protected def processGrailsConfigurations() {
+		def application=applicationContext.grailsApplication
+		ProxyHandler proxyHandler = applicationContext.getBean(ProxyHandler.class);
+		MarshallingConfigBuilder delegate=new MarshallingConfigBuilder();
+		def namedConfigs=new HashSet<String>();
+		application.domainClasses.each{
+			def mc=GCU.getStaticPropertyValue(it.clazz,'marshalling');
+			if(mc){
+				mc.setDelegate(delegate)
+				mc.call()
+				MarshallingConfig c=new MarshallingConfig(config:delegate.config);
+				['xml', 'json'].each {type->namedConfigs<< c.getConfigNamesForContentType(type)}
+			}
+		}
+		namedConfigs.flatten().each{name->
+			if(name=='default'){
+				XML.registerObjectMarshaller(new GenericDomainClassXMLMarshaller('default',proxyHandler));
+				JSON.registerObjectMarshaller(new GenericDomainClassJSONMarshaller('default',proxyHandler));
+			}else{
+				XML.createNamedConfig(name) {
+					it.registerObjectMarshaller(new GenericDomainClassXMLMarshaller(name,proxyHandler));
+				}
+				JSON.createNamedConfig(name) {
+					it.registerObjectMarshaller(new GenericDomainClassJSONMarshaller(name,proxyHandler));
+				}
+			}
+		}
+		[xml: XML, json: JSON].each { type, converterClass ->
+			def marshallerCfg = GrailsConfig.get("grails.plugins.marshallers.${type}")
+			processConfig(marshallerCfg, converterClass, type)
+		}
+	}
+
+	public void processConfig(Closure cfg, Class converterClass, type) {
+		def converterCfg = ConvertersConfigurationHolder.getConverterConfiguration(converterClass)
+		def builder = new ConfigurationBuilder(type: type, applicationContext: applicationContext, cfg: converterCfg, log: LOG, converterClass: converterClass, cfgName: "default")
+		builder.registerSpringMarshallers()
+		if (cfg != null) {
+			cfg.delegate = builder
+			cfg.resolveStrategy = Closure.DELEGATE_FIRST;
+			cfg.call()
+		}
+	}
+
+	
 }
 

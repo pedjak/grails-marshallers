@@ -93,12 +93,14 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 		for (GrailsDomainClassProperty property : properties) {
 			if(!isIn(mc,'identifier',property.getName()) && !isIn(mc,'ignore',property.getName()) && !isIn(mc,'attribute',property.getName())){
 				def serializers=mc?.serializer
+				Object val = beanWrapper.getPropertyValue(property.getName());
 				if(serializers && serializers[property.name]){
-					Object val = beanWrapper.getPropertyValue(property.getName());
 					serializers[property.name].call(val,xml)
 				}else{
-					LOG.debug("Trying to write field as xml element: $property.name on $value")
-					writeElement(xml, property, beanWrapper,mc);
+					if(val){
+						LOG.debug("Trying to write field as xml element: $property.name on $value")
+						writeElement(xml, property, beanWrapper,mc);
+					}
 				}
 			}
 		}
