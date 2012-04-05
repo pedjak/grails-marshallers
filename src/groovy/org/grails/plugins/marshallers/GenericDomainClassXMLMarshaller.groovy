@@ -1,3 +1,5 @@
+
+
 package org.grails.plugins.marshallers
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,30 +14,32 @@ import java.util.TreeSet;
 
 import grails.converters.XML
 
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.grails.support.proxy.EntityProxyHandler;
 import org.codehaus.groovy.grails.support.proxy.ProxyHandler;
 import org.codehaus.groovy.grails.web.converters.ConverterUtil;
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder;
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException;
 import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller;
 import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller;
 import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
 import org.codehaus.groovy.grails.commons.GrailsDomainClass;
 import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty;
-import org.codehaus.groovy.grails.commons.GrailsDomainConfigurationUtil;
 
-import org.codehaus.groovy.grails.web.converters.marshaller.json.DomainClassMarshaller;
 import org.grails.plugins.marshallers.config.MarshallingConfig;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.util.ClassUtils;
 
 class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAwareMarshaller {
 	private static Log LOG = LogFactory.getLog(GenericDomainClassXMLMarshaller.class);
 	private String configName;
 	private final boolean includeVersion=false;
 	private ProxyHandler proxyHandler;
+	private static Map<Class,Class> attributeEditors=new HashMap<Class,Class>()
 
 	public GenericDomainClassXMLMarshaller(String configName, ProxyHandler proxyHandler){
 		LOG.debug("Registered xml domain class marshaller for $configName");
@@ -65,7 +69,9 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 				}else{
 					mc.identifier.each{
 						def	val = beanWrapper.getPropertyValue(it);
-						xml.attribute(it,String.valueOf(val));
+						if(val!=null){
+							xml.attribute(it,val.toString());
+						}
 					}
 				}
 			}else{
@@ -83,7 +89,14 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 				LOG.debug("Trying to write field as xml attribute: $prop on $value")
 				Object val = beanWrapper.getPropertyValue(prop);
 				if(val!=null){
-					xml.attribute(prop, String.valueOf(val))
+					def editorEntry=attributeEditors.find{ it.key.isAssignableFrom(val.getClass())}
+					if(editorEntry){
+						def editor=editorEntry.value.newInstance()
+						editor.setValue(val);
+						xml.attribute(prop, editor.getAsText());
+					}else{
+						xml.attribute(prop, val.toString());
+					}
 				}
 			}
 		}
@@ -222,6 +235,11 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 	private boolean isIn(config,configName,fieldName){
 		return config[configName]!=null?config[configName].find{it==fieldName}!=null:false;
 
+	}
+
+
+	public static registerAttributeEditor(Class attrType,Class editorType){
+		attributeEditors.put(attrType,editorType)
 	}
 
 	@Override

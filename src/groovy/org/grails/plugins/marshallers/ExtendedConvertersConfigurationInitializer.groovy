@@ -26,6 +26,7 @@ import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigu
 import org.codehaus.groovy.grails.web.converters.configuration.DefaultConverterConfiguration;
 import org.grails.plugins.marshallers.config.MarshallingConfig
 import org.grails.plugins.marshallers.config.MarshallingConfigBuilder
+import org.springframework.core.convert.ConversionService;
 
 /**
  * @author Predrag Knezevic
@@ -33,7 +34,7 @@ import org.grails.plugins.marshallers.config.MarshallingConfigBuilder
  */
 class ExtendedConvertersConfigurationInitializer extends ConvertersConfigurationInitializer {
 
-	
+
 
 	@Override
 	public void initialize() {
@@ -84,7 +85,5 @@ class ExtendedConvertersConfigurationInitializer extends ConvertersConfiguration
 			cfg.call()
 		}
 	}
-
-	
 }
 
