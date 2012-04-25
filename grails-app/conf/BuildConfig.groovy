@@ -10,6 +10,7 @@ grails.project.dependency.resolution = {
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
+	grailsRepo "http://grails.org/plugins"
         grailsPlugins()
         grailsHome()
         grailsCentral()
@@ -23,8 +24,13 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
+    plugins {
+        build ":release:2.0.0", {
+            export = false
+        }
+    }
     dependencies {
-		build "org.apache.ivy:ivy:2.2.0"
+//		build "org.apache.ivy:ivy:2.2.0"
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
