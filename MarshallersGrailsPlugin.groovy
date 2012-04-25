@@ -13,9 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
+import org.codehaus.groovy.grails.support.proxy.DefaultProxyHandler;
+import org.codehaus.groovy.grails.support.proxy.ProxyHandler;
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
+import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller;
+import org.grails.plugins.marshallers.GenericDomainClassXMLMarshaller;
 import org.grails.plugins.marshallers.XmlMarshallerArtefactHandler
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
+import org.grails.plugins.marshallers.config.MarshallingConfig;
+import org.grails.plugins.marshallers.config.MarshallingConfigBuilder;
+import grails.converters.XML;
+import grails.converters.JSON;
+
 
 class MarshallersGrailsPlugin {
     // the plugin version
@@ -36,7 +46,10 @@ class MarshallersGrailsPlugin {
     def scm = [url: "http://github.com/pedjak/grails-marshallers"]
     def licence = "APACHE"
     
-    def artefacts = [ XmlMarshallerArtefactHandler, JsonMarshallerArtefactHandler ]
+	def artefacts = [
+		XmlMarshallerArtefactHandler,
+		JsonMarshallerArtefactHandler
+	]
     
     def author = "Predrag Knezevic"
     def authorEmail = "pedjak@gmail.com"
@@ -62,4 +75,7 @@ Further documentation can be found <a href="http://github.com/pedjak/grails-mars
         }
     }
         
+
+
+
 }

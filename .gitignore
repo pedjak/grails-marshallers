@@ -2,3 +2,6 @@
 .project
 .settings
 target
+/.link_to_grails_plugins
+/.link_to_grails_plugins/*
+/target-eclipse
