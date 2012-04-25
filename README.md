@@ -199,11 +199,11 @@ In the above specified configuration
 Within the named configuration closure there are several configuration options possible
 
 * *ignoreIdentifier* when true will suppress serialization of domain object identifier
-* *identifier* a comma separated list of fields which uniquely identifies a domain object in case database id is not sufficient. 
+* *identifier* is a comma separated list of fields which uniquely identifies a domain object in case database id is not sufficient. 
 * *elementName* configures a custom domain object element name which should be used instead of default one
-* *attribute* a comma separated list of field names which will be serialized as attributes of domain object element 
-* *deep* a comma separated list of field names. If a field representing one-to-many relation is marked as *deep*, all contained data of related objects will be serialized
-* *virtual* configuration option allows us to define closures with custom serialization behavior
+* *attribute* is a comma separated list of field names which will be serialized as attributes of domain object element 
+* *deep* is a comma separated list of field names. If a field representing one-to-many relation is marked as *deep*, all contained data of related objects will be serialized
+* *virtual* is a configuration option allows us to define closures with custom serialization behavior
 
 When configuration is defined as above the following snippet of code would perform actual serialization
 	
@@ -224,7 +224,7 @@ Producing the following hypothetical XML output
 			<my-book isbn="2222">
 				<name>Freedom</name>
 			<my-book>
-		<%books>
+		</books>
 		<popularBooks>
 			<my-book isbn="2222">
 				<name>Freedom</name>
