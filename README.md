@@ -127,7 +127,7 @@ does not follow marshaller artifact convention, e.g.:
 Generic Domain Class Marshallers
 --------------------------------
 
-Let's assume that you have the following domain class which has to be serialized
+Let's assume that you have the following domain classes which has to be serialized
 	
 	class Author {
      	String name
@@ -140,15 +140,26 @@ Let's assume that you have the following domain class which has to be serialized
       	String name
     }
     
-Marshaling configuration for a class is specified as a static closure
+and we need to serialize dob and isbn fields as attributes and books belonging to an author has to be serialized as part of author element
+
+Marshaling configuration for such a case is specified as a static closure of each class
   	
   	class Author {
     	static marshalling={
-			xml {
-				nested {
+			xml { 
+				export {
 					ignoreIdentifier true
 					attribute 'dob'
 					deep 'books'
+					virtual {
+						popularBooks {author,xml->
+							author.findPopularBooks().each{ popularBook->
+								xml.startNode(xml.getElementName(popularBook))
+								xml.lookupObjectMarshaller(popularBook).marshalObject(popularBook,xml)
+								xml.end()
+							}
+						}
+					}
 				}
 			}
 		}
@@ -162,8 +173,8 @@ Marshaling configuration for a class is specified as a static closure
 	class Book {
 		static marshalling={
 			xml {
-				nested {
-					elementName 'my-element-name'
+				export {
+					elementName 'my-book'
 					attribute 'isbn'
 				}
 			}
@@ -173,8 +184,46 @@ Marshaling configuration for a class is specified as a static closure
       	String name
     }
     
-  
+
+In the above specified configuration 
 
 
 
+* *xml* is the serialization format. Currently, only *xml* is supported, but it is planned to support *json* format also
+* *export* is the identifier for named converter configuration. Could be any name or *default* which identifies default converter configuration. 
+
+Within the named configuration closure there are several configuration options possible
+
+* *ignoreIdentifier* when true will suppress serialization of domain object identifier
+* *identifier* a comma separated list of fields which uniquely identifies a domain object in case database id is not sufficient. 
+* *elementName* configures a custom domain object element name which should be used instead of default one
+* *attribute* a comma separated list of field names which will be serialized as attributes of domain object element 
+* *deep* a comma separated list of field names. If a field representing one-to-many relation is marked as *deep*, all contained data of related objects will be serialized
+* *virtual* configuration option allows us to define closures with custom serialization behavior
+
+When configuration is defined as above the following snippet of code would perform actual serialization
 	
+	Author author=Author.findByName('Jonathan Franzen')
+	XML.use('export')
+	XML converter=new XML(author)
+	String xml=converter.toString()
+	
+Producing the following hypothetical XML output
+	
+	<?xml version="1.0" encoding="UTF-8"?>
+	<author dob="Fri Aug 17 00:00:00 CET 1959">
+		<name>Jonathan Franzen</name>
+		<books>
+			<my-book isbn="1111">
+				<name>The Twenty-Seventh City</name>
+			<my-book>
+			<my-book isbn="2222">
+				<name>Freedom</name>
+			<my-book>
+		<%books>
+		<popularBooks>
+			<my-book isbn="2222">
+				<name>Freedom</name>
+			<my-book>
+		</popularBooks>
+	</author>
