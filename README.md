@@ -123,5 +123,58 @@ when XML element name should be custom, e.g.
 does not follow marshaller artifact convention, e.g.:
 
 	register CustomAXMLSerializer
+
+Generic Domain Class Marshallers
+--------------------------------
+
+Let's assume that you have the following domain class which has to be serialized
 	
+	class Author {
+     	String name
+      	Date dob
+      	List books
+    }
+	
+	class Book {
+     	String isbn
+      	String name
+    }
+    
+Marshaling configuration for a class is specified as a static closure
+  	
+  	class Author {
+    	static marshalling={
+			xml {
+				nested {
+					ignoreIdentifier true
+					attribute 'dob'
+					deep 'books'
+				}
+			}
+		}
+     
+      	String name
+      	Date dob
+      	List books
+    }
+
+
+	class Book {
+		static marshalling={
+			xml {
+				nested {
+					elementName 'my-element-name'
+					attribute 'isbn'
+				}
+			}
+		}
+		
+     	String isbn
+      	String name
+    }
+    
+  
+
+
+
 	
