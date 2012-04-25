@@ -140,7 +140,11 @@ Let's assume that you have the following domain classes which has to be serializ
       	String name
     }
     
-and we need to serialize dob and isbn fields as attributes and books belonging to an author has to be serialized as part of author element
+and we have the following requirements
+
+* *dob* and *isbn* fields has to be serialized as attributes
+* *books* belonging to an *author* has to be serialized as children of *author* xml element
+* there is a static method of Author class which fetches popular books for an author. These popular books should also be serialized as children of *author* xml element 
 
 Marshaling configuration for such a case is specified as a static closure of each class
   	
