@@ -15,18 +15,18 @@
  ******************************************************************************/
 package org.grails.plugins.marshallers
 
-import grails.converters.JSON;
-import grails.converters.XML;
-import grails.util.GrailsConfig;
-import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
+import grails.converters.JSON
+import grails.converters.XML
+import grails.util.GrailsConfig
+import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.support.proxy.ProxyHandler
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder;
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer;
-import org.codehaus.groovy.grails.web.converters.configuration.DefaultConverterConfiguration;
+import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder
+import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
+import org.codehaus.groovy.grails.web.converters.configuration.DefaultConverterConfiguration
 import org.grails.plugins.marshallers.config.MarshallingConfig
 import org.grails.plugins.marshallers.config.MarshallingConfigBuilder
-import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.ConversionService
 
 /**
  * @author Predrag Knezevic
@@ -34,43 +34,53 @@ import org.springframework.core.convert.ConversionService;
  */
 class ExtendedConvertersConfigurationInitializer extends ConvertersConfigurationInitializer {
 
-
-
-    @Override
-    public void initialize() {
-        super.initialize()
+    // Grails 1.x entry point
+    void initialize() {
+        // Grails 2.x does not have anymore initialize() method in the super class, there is initialize(GrailsApplication) method instead
+        // therefore, we need to check what kind fo super class we have and call then the appropriate method
+        if (ConvertersConfigurationInitializer.metaClass.getMetaMethod('initialize', [GrailsApplication] as Object[]) != null) {
+            super.initialize(applicationContext.grailsApplication)
+        } else {
+            super.initialize()
+        }        
         processGrailsConfigurations()
     }
 
+    // Grails 2.x entry point
+    void initialize(GrailsApplication application) {
+        super.initialize(application)
+        processGrailsConfigurations()
+    }
+    
     protected def processGrailsConfigurations() {
 		def application=applicationContext.grailsApplication
-		ProxyHandler proxyHandler = applicationContext.getBean(ProxyHandler.class);
-		MarshallingConfigBuilder delegate=new MarshallingConfigBuilder();
-		def namedConfigs=new HashSet<String>();
+		ProxyHandler proxyHandler = applicationContext.getBean(ProxyHandler.class)
+		MarshallingConfigBuilder delegate=new MarshallingConfigBuilder()
+		def namedConfigs=new HashSet<String>()
 		application.domainClasses.each{
-			def mc=GCU.getStaticPropertyValue(it.clazz,'marshalling');
+			def mc=GCU.getStaticPropertyValue(it.clazz,'marshalling')
 			if(mc){
 				mc.setDelegate(delegate)
 				mc.call()
-				MarshallingConfig c=new MarshallingConfig(config:delegate.config);
+				MarshallingConfig c=new MarshallingConfig(config:delegate.config)
 				['xml', 'json'].each {type->namedConfigs<< c.getConfigNamesForContentType(type)}
 			}
 		}
 		namedConfigs.flatten().each{name->
 			if(name=='default'){
-				XML.registerObjectMarshaller(new GenericDomainClassXMLMarshaller('default',proxyHandler));
-				JSON.registerObjectMarshaller(new GenericDomainClassJSONMarshaller('default',proxyHandler));
+				XML.registerObjectMarshaller(new GenericDomainClassXMLMarshaller('default',proxyHandler, application))
+				JSON.registerObjectMarshaller(new GenericDomainClassJSONMarshaller('default',proxyHandler))
 			}else{
 				XML.createNamedConfig(name) {
-					it.registerObjectMarshaller(new GenericDomainClassXMLMarshaller(name,proxyHandler));
+					it.registerObjectMarshaller(new GenericDomainClassXMLMarshaller(name,proxyHandler, application))
 				}
 				JSON.createNamedConfig(name) {
-					it.registerObjectMarshaller(new GenericDomainClassJSONMarshaller(name,proxyHandler));
+					it.registerObjectMarshaller(new GenericDomainClassJSONMarshaller(name,proxyHandler))
 				}
 			}
 		}
         [xml: XML, json: JSON].each { type, converterClass ->
-            def marshallerCfg = applicationContext.grailsApplication.config?.grails?.plugins?.marshallers?."${type}"
+            def marshallerCfg = application.config?.grails?.plugins?.marshallers?."${type}"
             processConfig(marshallerCfg, converterClass, type)            
         }
     }
@@ -81,9 +91,11 @@ class ExtendedConvertersConfigurationInitializer extends ConvertersConfiguration
         builder.registerSpringMarshallers()
         if (cfg != null && cfg instanceof Closure) {
             cfg.delegate = builder
-            cfg.resolveStrategy = Closure.DELEGATE_FIRST;
+            cfg.resolveStrategy = Closure.DELEGATE_FIRST
             cfg.call()
         }
     }
+
+    
 }
 

@@ -25,7 +25,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
     plugins {
-        build ":release:2.0.0", {
+        build ":release:2.0.4", {
             export = false
         }
     }
