@@ -25,12 +25,12 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
     plugins {
-        build ":release:2.0.4", {
-            export = false
+	build ":tomcat:$grailsVersion"
+	build (':release:2.2.1') {
+                        export = false
         }
     }
     dependencies {
-//		build "org.apache.ivy:ivy:2.2.0"
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
