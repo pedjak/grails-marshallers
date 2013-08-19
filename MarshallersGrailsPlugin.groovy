@@ -28,16 +28,13 @@ import grails.converters.JSON;
 
 
 class MarshallersGrailsPlugin {
-    // the plugin version
-    def version = "0.3"
+	// the plugin version
+    def version = "0.4"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.1 > *"
     
-    def loadAfter = ['converters']
-    
-    
-    // the other plugins this plugin depends on
-    def dependsOn = [:]
+    def dependsOn = [converters: grailsVersion]
+      
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -53,6 +50,9 @@ class MarshallersGrailsPlugin {
     
     def author = "Predrag Knezevic"
     def authorEmail = "pedjak@gmail.com"
+    
+     def developers = [[name: "Denis Halupa", email: "denis.halupa@gmail.com"]]
+
     def title = "Easy Custom XML and JSON Marshalling for Grails Converters"
     def description = '''\\
 Easy registration and usage of custom XML and JSON marshallers supporting hierarchical configurations.
@@ -64,8 +64,8 @@ Further documentation can be found <a href="http://github.com/pedjak/grails-mars
     def documentation = "http://github.com/pedjak/grails-marshallers"
 
     def doWithSpring = {
-        // replace default convertersConfigurationInitializer from Converters plugin with ours
-        convertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
+        
+        extendedConvertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
         ["xml", "json"].each { type ->
             application."${type}MarshallerClasses".each { marshallerClass ->
                 "${marshallerClass.fullName}"(marshallerClass.clazz) { bean ->
@@ -74,6 +74,11 @@ Further documentation can be found <a href="http://github.com/pedjak/grails-mars
             }
         }
     }
+	
+	def doWithDynamicMethods = {applicationContext ->
+		applicationContext.extendedConvertersConfigurationInitializer.initialize()
+		log.debug "Marshallers Plugin configured successfully"
+	}
         
 
 

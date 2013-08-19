@@ -1,72 +1,59 @@
 
 
 package org.grails.plugins.marshallers
-import java.util.ArrayList
-import java.util.Collection
-import java.util.HashMap
-import java.util.HashSet
-import java.util.Map
-import java.util.Set
-import java.util.SortedMap
-import java.util.SortedSet
-import java.util.TreeMap
-import java.util.TreeSet
-
 import grails.converters.XML
+import groovy.util.logging.Log4j
 
-
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
+import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
+import org.codehaus.groovy.grails.commons.GrailsDomainClass
+import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
 import org.codehaus.groovy.grails.support.proxy.EntityProxyHandler
 import org.codehaus.groovy.grails.support.proxy.ProxyHandler
 import org.codehaus.groovy.grails.web.converters.ConverterUtil
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller
 import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
-import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
-import org.codehaus.groovy.grails.commons.GrailsDomainClass
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
-
 import org.grails.plugins.marshallers.config.MarshallingConfig
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
-import org.springframework.beans.SimpleTypeConverter
-import org.springframework.core.convert.ConversionService
-import org.springframework.util.ClassUtils
-
+/**
+ * 
+ * @author dhalupa
+ *
+ */
+@Log4j
 class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAwareMarshaller {
-	private static Log LOG = LogFactory.getLog(GenericDomainClassXMLMarshaller.class)
-	private String configName
-	private final boolean includeVersion=false
+
 	private ProxyHandler proxyHandler
-    private GrailsApplication application
-    
+	private GrailsApplication application
+	private Map configCache
+
 	private static Map<Class,Class> attributeEditors=new HashMap<Class,Class>()
 
-	public GenericDomainClassXMLMarshaller(String configName, ProxyHandler proxyHandler, GrailsApplication application){
-		this.configName=configName
+	public GenericDomainClassXMLMarshaller(ProxyHandler proxyHandler, GrailsApplication application,Map configCache){
 		this.proxyHandler=proxyHandler
-        this.application = application
-        if (LOG.debugEnabled) LOG.debug("Registered xml domain class marshaller for $configName")        
+		this.application = application
+		this.configCache=configCache
 	}
 
 	@Override
 	public boolean supports(Object object) {
-        def clazz=object.getClass()
-        String name = ConverterUtil.trimProxySuffix(clazz.getName())
-        return application.isArtefactOfType(DomainClassArtefactHandler.TYPE, name) && GCU.getStaticPropertyValue(clazz,'marshalling')		
+		def clazz=proxyHandler.unwrapIfProxy(object).getClass()
+		boolean supports=configCache.containsKey(object.getClass())
+		if(log.debugEnabled) log.debug("Support for $clazz is $supports")
+		return supports
 	}
 
 	@Override
 	public void marshalObject(Object value, XML xml)	throws ConverterException {
-		if (LOG.debugEnabled) LOG.debug("Marshalling of $value started")
+		if (log.debugEnabled) log.debug("Marshalling of $value started")
 		Class clazz = value.getClass()
-        GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, ConverterUtil.trimProxySuffix(clazz.getName()))
-		def mc=MarshallingConfig.getForClass(clazz).getConfig('xml',configName)
+		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, ConverterUtil.trimProxySuffix(clazz.getName()))
+		MarshallingConfig mc=configCache[clazz]
 		BeanWrapper beanWrapper = new BeanWrapperImpl(value)
-		if(mc.ignoreIdentifier==null || !mc.ignoreIdentifier){
+		if(mc.shouldOutputIdentifier){
 			if(mc.identifier){
 				if(mc.identifier.size()==1 && mc.identifier[0] instanceof Closure){
 					mc.identifier[0].call(value,xml)
@@ -84,38 +71,44 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 				if (idValue != null) xml.attribute("id", String.valueOf(idValue))
 			}
 		}
-		if (includeVersion) {
+		if (mc.shouldOutputVersion) {
 			Object versionValue = beanWrapper.getPropertyValue(domainClass.getVersion().getName())
 			xml.attribute("version", String.valueOf(versionValue))
 		}
-		if(mc.attribute){
-			mc.attribute.each{prop->
-				if (LOG.debugEnabled) LOG.debug("Trying to write field as xml attribute: $prop on $value")
-				Object val = beanWrapper.getPropertyValue(prop)
-				if(val!=null){
-					def editorEntry=attributeEditors.find{ it.key.isAssignableFrom(val.getClass())}
-					if(editorEntry){
-						def editor=editorEntry.value.newInstance()
-						editor.setValue(val)
-						xml.attribute(prop, editor.getAsText())
-					}else{
-						xml.attribute(prop, val.toString())
-					}
+		
+		if (mc.shouldOutputClass) {
+			xml.attribute("class", clazz.getName())
+		}
+
+		mc.attribute?.each{prop->
+			if (log.debugEnabled) log.debug("Trying to write field as xml attribute: $prop on $value")
+			Object val = beanWrapper.getPropertyValue(prop)
+			if(val!=null){
+				def editorEntry=attributeEditors.find{ it.key.isAssignableFrom(val.getClass())}
+				if(editorEntry){
+					def editor=editorEntry.value.newInstance()
+					editor.setValue(val)
+					xml.attribute(prop, editor.getAsText())
+				}else{
+					xml.attribute(prop, val.toString())
 				}
 			}
 		}
 
+
 		GrailsDomainClassProperty[] properties = domainClass.getPersistentProperties()
 
 		for (GrailsDomainClassProperty property : properties) {
-			if(!isIn(mc,'identifier',property.getName()) && !isIn(mc,'ignore',property.getName()) && !isIn(mc,'attribute',property.getName())){
+			if(!mc.identifier?.contains(property.getName()) && !mc.ignore?.contains(property.getName()) && !mc.attribute?.contains(property.getName())){
 				def serializers=mc?.serializer
 				Object val = beanWrapper.getPropertyValue(property.getName())
 				if(serializers && serializers[property.name]){
+					xml.startNode(property.name)
 					serializers[property.name].call(val,xml)
+					xml.end()
 				}else{
 					if(val){
-						if (LOG.debugEnabled) LOG.debug("Trying to write field as xml element: $property.name on $value")
+						if (log.debugEnabled) log.debug("Trying to write field as xml element: $property.name on $value")
 						writeElement(xml, property, beanWrapper,mc)
 					}
 				}
@@ -131,7 +124,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 	}
 
 
-	private writeElement(XML xml, GrailsDomainClassProperty property, BeanWrapper beanWrapper,mc) {
+	private writeElement(XML xml, GrailsDomainClassProperty property, BeanWrapper beanWrapper,MarshallingConfig mc) {
 		xml.startNode(property.getName())
 		if (!property.isAssociation()) {
 			// Write non-relation property
@@ -140,7 +133,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 		}
 		else {
 			Object referenceObject = beanWrapper.getPropertyValue(property.getName())
-			if (isIn(mc,'deep',property.getName())) {
+			if (mc.deep?.contains(property.getName())) {
 				renderDeep(referenceObject, xml)
 			}
 			else {
@@ -208,9 +201,9 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 
 
 	protected void asShortObject(Object refObj, XML xml, GrailsDomainClassProperty idProperty,
-	@SuppressWarnings("unused") GrailsDomainClass referencedDomainClass) throws ConverterException {
-		def refClassConfig=MarshallingConfig.getForClass(referencedDomainClass.clazz)?.getConfig('xml',configName)
-		if(refClassConfig && refClassConfig.identifier){
+			@SuppressWarnings("unused") GrailsDomainClass referencedDomainClass) throws ConverterException {
+		MarshallingConfig refClassConfig=configCache[referencedDomainClass.clazz]
+		if(refClassConfig.identifier){
 			if(refClassConfig.identifier.size()==1 && refClassConfig.identifier[0] instanceof Closure){
 				refClassConfig.identifier[0].call(refObj,xml)
 			}else{
@@ -236,10 +229,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 		}
 	}
 
-	private boolean isIn(config,configName,fieldName){
-		return config[configName]!=null?config[configName].find{it==fieldName}!=null:false
 
-	}
 
 
 	public static registerAttributeEditor(Class attrType,Class editorType){
@@ -249,8 +239,8 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 	@Override
 	public String getElementName(Object value) {
 		Class clazz = value.getClass()
-        GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, ConverterUtil.trimProxySuffix(clazz.getName()))
-		def mc=MarshallingConfig.getForClass(clazz).getConfig('xml',configName)
+		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, ConverterUtil.trimProxySuffix(clazz.getName()))
+		MarshallingConfig mc=configCache[clazz]
 		return mc.elementName?:domainClass.logicalPropertyName
 	}
 }
