@@ -1,5 +1,6 @@
 Custom Grails XML and JSON Marshallers
 ======================================
+[![Build Status](https://travis-ci.org/pedjak/grails-marshallers.png?branch=master)](https://travis-ci.org/pedjak/grails-marshallers)
 
 The development of this plugin has been inspired by [this blog post](http://jwicz.wordpress.com/2011/07/11/grails-custom-xml-marshaller/)
 and a need to use custom marshallers - mostly by REST services whose responses must fulfill already defined formats.
