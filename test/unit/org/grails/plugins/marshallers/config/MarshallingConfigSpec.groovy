@@ -7,6 +7,9 @@ import spock.lang.Specification
 @TestMixin(MarshallerUnitSpecMixin)
 class MarshallingConfigSpec extends Specification {
 	
+    class A {
+        
+    }
 	static def testConfig={
 		xml{
 			'default' {
@@ -33,13 +36,7 @@ class MarshallingConfigSpec extends Specification {
 	}
 
 
-	def "test app"(){
-		when:true
-		then:
-		grailsApplication!=null
-	}
-
-
+	
 	def "can build marshalling config"(){
 		given:
 		def cl={
@@ -64,13 +61,15 @@ class MarshallingConfigSpec extends Specification {
 			xml{ elementName 'test' }
 			some {}
 		}
-		MarshallingConfigBuilder bldr=new MarshallingConfigBuilder()
+                
+		MarshallingConfigBuilder bldr=new MarshallingConfigBuilder(A)
 		cl.delegate=bldr
 		cl.resolveStrategy = Closure.DELEGATE_FIRST
 		when:
 		cl()
 		def config=bldr.config
 		then:
+        config.clazz == A
 		config.shouldOutputClass
 		config.identifier==['uuid', 'id']
 		config.children.size()==3
@@ -99,7 +98,7 @@ class MarshallingConfigSpec extends Specification {
 				restrictedExport { identifier 'uuid' }
 			}
 		}
-		MarshallingConfigBuilder bldr=new MarshallingConfigBuilder()
+		MarshallingConfigBuilder bldr=new MarshallingConfigBuilder(A)
 		cl.delegate=bldr
 		cl.resolveStrategy = Closure.DELEGATE_FIRST
 		when:
@@ -113,7 +112,7 @@ class MarshallingConfigSpec extends Specification {
 	def "can build marshalling config with default configuration"(){
 		given:
 		def cl={ identifier 'id' }
-		MarshallingConfigBuilder bldr=new MarshallingConfigBuilder()
+		MarshallingConfigBuilder bldr=new MarshallingConfigBuilder(A)
 		cl.delegate=bldr
 		cl.resolveStrategy = Closure.DELEGATE_FIRST
 		when:
@@ -127,7 +126,7 @@ class MarshallingConfigSpec extends Specification {
 	def "can build marshalling config for empty config"(){
 		given:
 		def cl={ json{smart{}} }
-		MarshallingConfigBuilder bldr=new MarshallingConfigBuilder()
+		MarshallingConfigBuilder bldr=new MarshallingConfigBuilder(A)
 		cl.delegate=bldr
 		cl.resolveStrategy = Closure.DELEGATE_FIRST
 		when:

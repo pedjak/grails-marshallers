@@ -16,18 +16,18 @@
 package org.grails.plugins.marshallers
 
 
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder;
-import org.codehaus.groovy.grails.web.converters.configuration.DefaultConverterConfiguration;
-import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller;
-import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller;
+import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationHolder
+import org.codehaus.groovy.grails.web.converters.configuration.DefaultConverterConfiguration
+import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller
+import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
 
-import groovy.lang.Closure;
+import groovy.lang.Closure
 
-import org.codehaus.groovy.grails.web.converters.Converter;
+import org.codehaus.groovy.grails.web.converters.Converter
 
-import org.codehaus.groovy.grails.web.converters.marshaller.ClosureOjectMarshaller;
+import org.codehaus.groovy.grails.web.converters.marshaller.ClosureOjectMarshaller
 
-import groovy.lang.Closure;
+import groovy.lang.Closure
 import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
 
 /**
@@ -43,6 +43,7 @@ class ConfigurationBuilder {
     def converterClass
     def cfgName
     def type
+    def parentConf
     
     def ensureCfg() {
         if (! (cfg instanceof DefaultConverterConfiguration)) {
@@ -107,11 +108,12 @@ class ConfigurationBuilder {
                 newCfg = new DefaultConverterConfiguration(cfg)
                 ConvertersConfigurationHolder.setNamedConverterConfiguration(converterClass, name, newCfg)                
             }
-            def builder = new ConfigurationBuilder(type: type, applicationContext: applicationContext, cfg: newCfg, converterClass: converterClass, log: log, cfgName: name)
+            parentConf[(name)] = cfgName
+            def builder = new ConfigurationBuilder(parentConf: parentConf, type: type, applicationContext: applicationContext, cfg: newCfg, converterClass: converterClass, log: log, cfgName: name)
             builder.registerSpringMarshallers()
             def closure = args[0]
             closure.delegate = builder
-            closure.resolveStrategy = Closure.DELEGATE_FIRST;
+            closure.resolveStrategy = Closure.DELEGATE_FIRST
             closure.call()
         }
     }

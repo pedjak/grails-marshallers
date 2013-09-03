@@ -16,6 +16,7 @@ import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller
 import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.plugins.marshallers.config.MarshallingConfig
+import org.grails.plugins.marshallers.config.MarshallingConfigPool
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
 /**
@@ -28,30 +29,31 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 
 	private ProxyHandler proxyHandler
 	private GrailsApplication application
-	private Map configCache
+	private MarshallingConfigPool configPool
 
 	private static Map<Class,Class> attributeEditors=new HashMap<Class,Class>()
 
-	public GenericDomainClassXMLMarshaller(ProxyHandler proxyHandler, GrailsApplication application,Map configCache){
+	public GenericDomainClassXMLMarshaller(ProxyHandler proxyHandler, GrailsApplication application, MarshallingConfigPool configPool){
 		this.proxyHandler=proxyHandler
 		this.application = application
-		this.configCache=configCache
+		this.configPool = configPool
 	}
 
 	@Override
 	public boolean supports(Object object) {
 		def clazz=proxyHandler.unwrapIfProxy(object).getClass()
-		boolean supports=configCache.containsKey(object.getClass())
+		boolean supports = configPool.get(clazz) != null
 		if(log.debugEnabled) log.debug("Support for $clazz is $supports")
 		return supports
 	}
 
 	@Override
-	public void marshalObject(Object value, XML xml)	throws ConverterException {
-		if (log.debugEnabled) log.debug("Marshalling of $value started")
-		Class clazz = value.getClass()
-		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, ConverterUtil.trimProxySuffix(clazz.getName()))
-		MarshallingConfig mc=configCache[clazz]
+	public void marshalObject(Object v, XML xml)	throws ConverterException {
+		if (log.debugEnabled) log.debug("Marshalling of $v started")
+		def value=proxyHandler.unwrapIfProxy(v)
+		Class clazz=value.getClass()
+		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, clazz.getName())
+		MarshallingConfig mc = configPool.get(clazz)
 		BeanWrapper beanWrapper = new BeanWrapperImpl(value)
 		if(mc.shouldOutputIdentifier){
 			if(mc.identifier){
@@ -202,8 +204,8 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 
 	protected void asShortObject(Object refObj, XML xml, GrailsDomainClassProperty idProperty,
 			@SuppressWarnings("unused") GrailsDomainClass referencedDomainClass) throws ConverterException {
-		MarshallingConfig refClassConfig=configCache[referencedDomainClass.clazz]
-		if(refClassConfig.identifier){
+		MarshallingConfig refClassConfig = configPool.get(referencedDomainClass.clazz, true)
+		if(refClassConfig?.identifier){
 			if(refClassConfig.identifier.size()==1 && refClassConfig.identifier[0] instanceof Closure){
 				refClassConfig.identifier[0].call(refObj,xml)
 			}else{
@@ -238,9 +240,10 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 
 	@Override
 	public String getElementName(Object value) {
-		Class clazz = value.getClass()
+		if (log.debugEnabled) log.debug("Fetching element name for $value")
+		Class clazz=proxyHandler.unwrapIfProxy(value).getClass()
 		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, ConverterUtil.trimProxySuffix(clazz.getName()))
-		MarshallingConfig mc=configCache[clazz]
+		MarshallingConfig mc = configPool.get(clazz, true)
 		return mc.elementName?:domainClass.logicalPropertyName
 	}
 }

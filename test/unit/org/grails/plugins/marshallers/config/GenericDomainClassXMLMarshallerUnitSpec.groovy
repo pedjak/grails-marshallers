@@ -4,13 +4,16 @@ import grails.converters.XML
 import grails.persistence.Entity
 import grails.test.mixin.*
 
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer;
-import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer;
+import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
+import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
+import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
+import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller
+import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.plugins.marshallers.XmlMarshallerArtefactHandler
 import org.grails.plugins.marshallers.test.MarshallerUnitSpecMixin
 
-import spock.lang.Shared;
+import spock.lang.Shared
 import spock.lang.Specification
 /**
  * 
@@ -166,11 +169,13 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		when:
 		def	j
 		XML.use('named'){
-			j=j=new XML(invoice)
+			j=new XML(invoice)
 		}
 		def m=new XmlSlurper().parseText(j.toString())
+        println j.toString()
 		then:
 		m.items.item.size()==2
+        m.items.item[0].children().size() == 2
 		m.items.item[0].name.text()
 		m.items.item[1].name.text()
 		m.items.item[0].amount.text()
@@ -192,7 +197,7 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		when:
 		def	j
 		XML.use('named'){
-			j=j=new XML(invoice)
+			j=new XML(invoice)
 		}
 		def m=new XmlSlurper().parseText(j.toString())
 		then:
@@ -203,9 +208,148 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		m.items.item[1].amount
 	}
 	
+    def "nested configuration"() {
+        given:
+        grailsApplication.config.grails.plugins.marshallers.xml = {
+            c1 {
+                c2 {
+                    
+                }
+            }
+        }
+        Invoice.marshalling = {
+            xml {
+                c1 {
+                    deep 'items'
+                    ignore 'admin'
+                    attribute 'name'
+                }
+            }
+        }
+        Item.marshalling = {
+            xml {
+                c2 {
+                    ignore 'amount'
+                }
+                
+            }
+            
+        }
+        initialize()
+        
+        when:
+        def rootInvoice
+        
+        def rootItem
+        XML.use('c2') {
+            // invoice will be serialized according to rules in c1 conf, because it does not have c2 conf
+            rootInvoice= new XmlSlurper().parseText(new XML(invoice).toString())
+            
+            // serialized according to c2 conf
+            rootItem = new XmlSlurper().parseText(new XML(invoice.items.first()).toString())
+        }
+        
+        then:
+        rootInvoice.items.item.amount.size() == 0
+        rootInvoice.items.item.name.size() == invoice.items.size()
+        rootInvoice.admin.size() == 0
+        rootInvoice.name.size() == 0
+        rootInvoice.'@name'.text() == invoice.name
+        
+        rootItem.amount.size() == 0
+        rootItem.name.size() > 0
+        
+    }
+    
+    def "use parent configuration for association and deep = false"() {
+        given:
+        grailsApplication.config.grails.plugins.marshallers.xml = {
+            c1 {
+                c2 {
+                    
+                }
+            }
+        }
+        Invoice.marshalling = {
+            xml {
+                c2 {
+                    attribute 'name'
+                }
+            }
+        }
+        Item.marshalling = {
+            xml {
+                c1 {
+                    identifier 'name'
+                }
+                
+            }
+            
+        }
+        initialize()
+        
+        when:
+        def rootInvoice
+        
+        XML.use('c2') {
+            // invoice will be serialized according to rules in c1 conf, because it does not have c2 conf
+            rootInvoice= new XmlSlurper().parseText(new XML(invoice).toString())            
+        }
+        
+        then:
+        rootInvoice.'@name'.text() == invoice.name
+        rootInvoice.items.item*.'@name'*.text() as Set == invoice.items*.name as Set            
+    }
+    
+    def "marshaller registered in config takes precedence over marshalling configuration in domain class"() {
+        given:
+        grailsApplication.config.grails.plugins.marshallers.xml = {
+            c1 {
+                register(ItemMarshaller)
+            }
+        }
+        Item.marshalling = {
+            xml {
+                c1 {
+                    identifier 'name'
+                }
+                
+            }
+            
+        }
+        initialize()
+        
+        when:
+        def rootItem
+        XML.use('c1') {
+            // invoice will be serialized according to rules in c1 conf, because it does not have c2 conf
+            rootItem= new XmlSlurper().parseText(new XML(invoice.items.first()).toString())
+        }
+        
+        then:
+        rootItem.name() == 'xxx'
+    }
+    
 	private def initialize(){
 		grailsApplication.mainContext.convertersConfigurationInitializer.initialize(grailsApplication)
 		grailsApplication.mainContext.extendedConvertersConfigurationInitializer.initialize()
 	}
 }
 
+class ItemMarshaller implements ObjectMarshaller<XML>, NameAwareMarshaller {
+    
+    @Override
+    public boolean supports(Object object) {
+        return object.class == Item
+    }
+
+    @Override
+    public void marshalObject(Object value, XML xml)    throws ConverterException {
+        xml.attribute('name', value.name)
+    }
+    
+    @Override
+    public String getElementName(Object value) {
+        return 'xxx'
+    }
+}
