@@ -1,18 +1,18 @@
 package org.grails.plugins.marshallers.config
-import java.util.List;
-import java.util.Map;
+import java.util.List
+import java.util.Map
 /**
  * @author dhalupa
  */
 class MarshallingConfigBuilder {
 	private MarshallingConfig config=new MarshallingConfig()
 	
-	MarshallingConfigBuilder(){
-		
+	MarshallingConfigBuilder(Class clazz){
+		config.clazz = clazz
 	}
 	
 	MarshallingConfigBuilder(MarshallingConfig c){
-		['deep','identifier','elementName','attribute','virtual','shouldOutputIdentifier','shouldOutputClass','shouldOutputVersion','ignore'].each{p->
+		['clazz', 'deep','identifier','elementName','attribute','virtual','shouldOutputIdentifier','shouldOutputClass','shouldOutputVersion','ignore'].each{p->
 			if(c[p]!=null){
 				config[p]=c[p]
 			}

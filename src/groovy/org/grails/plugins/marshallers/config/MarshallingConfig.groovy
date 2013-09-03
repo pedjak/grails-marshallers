@@ -57,6 +57,9 @@ class MarshallingConfig {
 
 	List children=[]
 
+    // configuration for the given class
+    Class clazz
+    
 	def findConfigNames(type){
 		def configs=[] as Set, worker
 		worker={
@@ -88,4 +91,7 @@ class MarshallingConfig {
 		result
 	}
 	
+    String toString() {
+        "${name}:${clazz}"
+    }
 }
