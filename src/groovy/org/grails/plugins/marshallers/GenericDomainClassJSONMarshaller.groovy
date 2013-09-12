@@ -37,7 +37,7 @@ class GenericDomainClassJSONMarshaller implements ObjectMarshaller<JSON> {
 	@Override
 	public boolean supports(Object object) {
 		def clazz=proxyHandler.unwrapIfProxy(object).getClass();
-		boolean supports=configCache.containsKey(object.getClass())
+		boolean supports=configCache.containsKey(clazz)
 		if(log.debugEnabled) log.debug("Support for $clazz is $supports")
 		return supports
 	}
