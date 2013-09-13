@@ -38,7 +38,7 @@ class GenericDomainClassJSONMarshaller implements ObjectMarshaller<JSON> {
 	@Override
 	public boolean supports(Object object) {
 		def clazz=proxyHandler.unwrapIfProxy(object).getClass()
-		boolean supports = configPool.get(object.getClass()) != null
+		boolean supports = configPool.get(clazz) != null
 		if(log.debugEnabled) log.debug("Support for $clazz is $supports")
 		return supports
 	}
