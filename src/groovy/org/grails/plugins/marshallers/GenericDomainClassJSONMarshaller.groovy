@@ -44,9 +44,9 @@ class GenericDomainClassJSONMarshaller implements ObjectMarshaller<JSON> {
 	}
 
 	@Override
-	public void marshalObject(Object value,JSON json)	throws ConverterException {
+	public void marshalObject(Object v,JSON json)	throws ConverterException {
 		JSONWriter writer = json.getWriter()
-		value = proxyHandler.unwrapIfProxy(value)
+		def value = proxyHandler.unwrapIfProxy(v)
 		Class clazz = value.getClass()
 		MarshallingConfig mc= configPool.get(clazz, true)
 		GrailsDomainClass domainClass = (GrailsDomainClass)application.getArtefact(
