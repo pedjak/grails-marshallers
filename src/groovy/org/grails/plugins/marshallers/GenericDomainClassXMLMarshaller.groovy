@@ -48,10 +48,11 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 	}
 
 	@Override
-	public void marshalObject(Object value, XML xml)	throws ConverterException {
+	public void marshalObject(Object v, XML xml)	throws ConverterException {
 		if (log.debugEnabled) log.debug("Marshalling of $value started")
-		Class clazz = value.getClass()
-		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, ConverterUtil.trimProxySuffix(clazz.getName()))
+		def value=proxyHandler.unwrapIfProxy(v)
+		Class clazz=value.getClass()
+		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, clazz.getName())
 		MarshallingConfig mc = configPool.get(clazz)
 		BeanWrapper beanWrapper = new BeanWrapperImpl(value)
 		if(mc.shouldOutputIdentifier){
@@ -239,7 +240,8 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 
 	@Override
 	public String getElementName(Object value) {
-		Class clazz = value.getClass()
+		if (log.debugEnabled) log.debug("Fetching element name for $value")
+		Class clazz=proxyHandler.unwrapIfProxy(value).getClass()
 		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, ConverterUtil.trimProxySuffix(clazz.getName()))
 		MarshallingConfig mc = configPool.get(clazz, true)
 		return mc.elementName?:domainClass.logicalPropertyName
