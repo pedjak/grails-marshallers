@@ -49,7 +49,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 
 	@Override
 	public void marshalObject(Object v, XML xml)	throws ConverterException {
-		if (log.debugEnabled) log.debug("Marshalling of $value started")
+		if (log.debugEnabled) log.debug("Marshalling of $v started")
 		def value=proxyHandler.unwrapIfProxy(v)
 		Class clazz=value.getClass()
 		GrailsDomainClass domainClass = application.getArtefact(DomainClassArtefactHandler.TYPE, clazz.getName())
