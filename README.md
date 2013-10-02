@@ -93,7 +93,8 @@ specify the configuration hierarchy in application Config:
 	} 
 ```
 We always have one default system configuration that is the parent of the named configurations on the 
-first level.
+first level. If a given configuration does not define a marshaller for a given class, it will be searched
+in its parent configuration until the system configuration is reached.
 
 Now, when we
 need to serialize instances of A restrictively, we would say:

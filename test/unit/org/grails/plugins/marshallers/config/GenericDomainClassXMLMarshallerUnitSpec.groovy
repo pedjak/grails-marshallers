@@ -169,11 +169,13 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		when:
 		def	j
 		XML.use('named'){
-			j=j=new XML(invoice)
+			j=new XML(invoice)
 		}
 		def m=new XmlSlurper().parseText(j.toString())
+        println j.toString()
 		then:
 		m.items.item.size()==2
+        m.items.item[0].children().size() == 2
 		m.items.item[0].name.text()
 		m.items.item[1].name.text()
 		m.items.item[0].amount.text()
@@ -195,7 +197,7 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		when:
 		def	j
 		XML.use('named'){
-			j=j=new XML(invoice)
+			j=new XML(invoice)
 		}
 		def m=new XmlSlurper().parseText(j.toString())
 		then:
