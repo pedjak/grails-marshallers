@@ -57,7 +57,7 @@ class MarshallersGrailsPlugin {
     def description = '''\\
 Easy registration and usage of custom XML and JSON marshallers supporting hierarchical configurations.
 
-Further documentation can be found <a href="http://github.com/pedjak/grails-marshallers">here</a>.
+Further documentation can be found on the GitHub repo.
 '''
 
     // URL to the plugin's documentation
