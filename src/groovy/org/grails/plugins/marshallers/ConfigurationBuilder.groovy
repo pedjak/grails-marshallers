@@ -25,7 +25,7 @@ import groovy.lang.Closure;
 
 import org.codehaus.groovy.grails.web.converters.Converter;
 
-import org.codehaus.groovy.grails.web.converters.marshaller.ClosureOjectMarshaller;
+import org.codehaus.groovy.grails.web.converters.marshaller.ClosureObjectMarshaller;
 
 import groovy.lang.Closure;
 import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
@@ -117,7 +117,7 @@ class ConfigurationBuilder {
     }
 }
 
-class NameAwareClosureObjectMarshaller<T extends Converter> extends ClosureOjectMarshaller<T> implements NameAwareMarshaller {
+class NameAwareClosureObjectMarshaller<T extends Converter> extends ClosureObjectMarshaller<T> implements NameAwareMarshaller {
     
     def elementName
     
