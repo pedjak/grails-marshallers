@@ -155,7 +155,7 @@ class GenericDomainClassJSONMarshaller implements ObjectMarshaller<JSON> {
 
 		mc.virtual?.each{prop,callable->
 			writer.key(prop);
-			mc.virtual[prop].call(value,writer)
+			mc.virtual[prop].call(value,json)
 
 		}
 
