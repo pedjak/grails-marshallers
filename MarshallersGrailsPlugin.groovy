@@ -31,7 +31,7 @@ class MarshallersGrailsPlugin {
 	// the plugin version
     def version = "0.5-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.1 > *"
+    def grailsVersion = "2.3 > *"
     
     def dependsOn = [converters: grailsVersion]
       
@@ -51,7 +51,7 @@ class MarshallersGrailsPlugin {
     def author = "Predrag Knezevic"
     def authorEmail = "pedjak@gmail.com"
     
-     def developers = [[name: "Denis Halupa", email: "denis.halupa@gmail.com"]]
+     def developers = [[name: "Denis Halupa", email: "denis.halupa@gmail.com"], [name: "Angel Ruiz", email: "aruizca@gmail.com"]]
 
     def title = "Easy Custom XML and JSON Marshalling for Grails Converters"
     def description = '''\\

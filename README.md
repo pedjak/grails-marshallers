@@ -27,7 +27,10 @@ produces by DomainClass marshaller.
 
 Feel free to check unit tests for detailed examples of usage
 
-
+Installation
+------------
+For apps using Grails version <= 2.2.x -> compile ":marshallers:0.4"
+For apps using Grails version >= 2.3.x -> compile ":marshallers:0.5"
 
  
 Creating and Registering Custom Marshallers
