@@ -3,6 +3,9 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.target.level = 1.6
 
+
+grails.project.dependency.resolver = "maven" // or ivy
+
 grails.project.dependency.resolution = {
 
     inherits("global")
@@ -11,7 +14,7 @@ grails.project.dependency.resolution = {
 		grailsCentral()
         mavenCentral()
         mavenLocal()
- 
+
     }
     plugins {
 		build (':release:3.0.1',
