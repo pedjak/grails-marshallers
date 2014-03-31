@@ -9,3 +9,6 @@ target
 /lib
 *.iml
 *.*~
+/.idea
+/atlassian-ide-plugin.xml
+/grails-app/i18n/messages.properties
