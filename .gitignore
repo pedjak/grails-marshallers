@@ -12,3 +12,6 @@ target
 /.idea
 /atlassian-ide-plugin.xml
 /grails-app/i18n/messages.properties
+/*.zip
+/*.sha1
+/plugin.xml
