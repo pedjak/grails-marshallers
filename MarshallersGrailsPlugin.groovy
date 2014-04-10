@@ -29,7 +29,7 @@ import grails.converters.JSON;
 
 class MarshallersGrailsPlugin {
 	// the plugin version
-    def version = "0.6-SNAPSHOT"
+    def version = "0.5.1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.3 > *"
     
@@ -40,7 +40,7 @@ class MarshallersGrailsPlugin {
             "grails-app/views/error.gsp"
     ]
 
-    def scm = [url: "http://github.com/pedjak/grails-marshallers"]
+    def scm = [url: "https://github.com/aruizca/grails-marshallers"]
     def licence = "APACHE"
     
 	def artefacts = [
@@ -61,7 +61,7 @@ Further documentation can be found on the GitHub repo.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://github.com/pedjak/grails-marshallers"
+    def documentation = "https://github.com/aruizca/grails-marshallers"
 
     def doWithSpring = {
         
