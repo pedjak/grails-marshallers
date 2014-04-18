@@ -47,6 +47,11 @@ class MarshallersGrailsPlugin {
 		XmlMarshallerArtefactHandler,
 		JsonMarshallerArtefactHandler
 	]
+
+    def watchedResources = [
+        'file:./grails-app/domain/*.groovy',
+        'file:./grails-app/conf/Config.groovy'
+    ]
     
     def author = "Predrag Knezevic"
     def authorEmail = "pedjak@gmail.com"
@@ -79,4 +84,8 @@ Further documentation can be found on the GitHub repo.
 		applicationContext.extendedConvertersConfigurationInitializer.initialize()
 		log.debug "Marshallers Plugin configured successfully"
 	}
+
+    def onChange = { event ->
+        event.ctx.extendedConvertersConfigurationInitializer.initialize()
+    }
 }
