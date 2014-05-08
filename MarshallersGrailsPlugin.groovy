@@ -40,7 +40,7 @@ class MarshallersGrailsPlugin {
             "grails-app/views/error.gsp"
     ]
 
-    def scm = [url: "https://github.com/aruizca/grails-marshallers"]
+    def scm = [url: "https://github.com/pedjak/grails-marshallers"]
     def licence = "APACHE"
     
 	def artefacts = [
@@ -66,7 +66,7 @@ Further documentation can be found on the GitHub repo.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "https://github.com/aruizca/grails-marshallers"
+    def documentation = "https://github.com/pedjak/grails-marshallers"
 
     def doWithSpring = {
         
