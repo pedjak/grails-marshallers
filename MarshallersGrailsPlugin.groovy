@@ -29,7 +29,7 @@ import grails.converters.JSON;
 
 class MarshallersGrailsPlugin {
 	// the plugin version
-    def version = "0.6"
+    def version = "0.7-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.3 > *"
     
