@@ -29,9 +29,9 @@ import grails.converters.JSON;
 
 class MarshallersGrailsPlugin {
 	// the plugin version
-    def version = "0.5-SNAPSHOT"
+    def version = "0.6-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.1 > *"
+    def grailsVersion = "2.3 > *"
     
     def dependsOn = [converters: grailsVersion]
       
@@ -40,18 +40,23 @@ class MarshallersGrailsPlugin {
             "grails-app/views/error.gsp"
     ]
 
-    def scm = [url: "http://github.com/pedjak/grails-marshallers"]
+    def scm = [url: "https://github.com/aruizca/grails-marshallers"]
     def licence = "APACHE"
     
 	def artefacts = [
 		XmlMarshallerArtefactHandler,
 		JsonMarshallerArtefactHandler
 	]
+
+    def watchedResources = [
+        'file:./grails-app/domain/*.groovy',
+        'file:./grails-app/conf/Config.groovy'
+    ]
     
     def author = "Predrag Knezevic"
     def authorEmail = "pedjak@gmail.com"
     
-     def developers = [[name: "Denis Halupa", email: "denis.halupa@gmail.com"]]
+     def developers = [[name: "Denis Halupa", email: "denis.halupa@gmail.com"], [name: "Angel Ruiz", email: "aruizca@gmail.com"]]
 
     def title = "Easy Custom XML and JSON Marshalling for Grails Converters"
     def description = '''\\
@@ -61,7 +66,7 @@ Further documentation can be found on the GitHub repo.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://github.com/pedjak/grails-marshallers"
+    def documentation = "https://github.com/aruizca/grails-marshallers"
 
     def doWithSpring = {
         
@@ -79,8 +84,8 @@ Further documentation can be found on the GitHub repo.
 		applicationContext.extendedConvertersConfigurationInitializer.initialize()
 		log.debug "Marshallers Plugin configured successfully"
 	}
-        
 
-
-
+    def onChange = { event ->
+        event.ctx.extendedConvertersConfigurationInitializer.initialize()
+    }
 }
