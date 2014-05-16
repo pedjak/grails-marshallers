@@ -79,7 +79,7 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		m.version!=null
 	}
 
-	def "specifying vritual property should output value"(){
+	def "specifying virtual property should output value"(){
 		given:
 		Invoice.marshalling = {
 			virtual{
