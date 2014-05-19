@@ -16,3 +16,4 @@ target
 /*.sha1
 /plugin.xml
 out/
+.DS_Store

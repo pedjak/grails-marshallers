@@ -252,8 +252,8 @@ Within the marshalling configuration closure there are several configuration opt
 * *elementName* configures a custom domain object element name which should be used instead of default one (xml)
 * *attribute* is a comma separated list of field names which will be serialized as attributes of domain object element (xml)
 * *deep* is a comma separated list of field names. If a field representing one-to-many relation is marked as *deep*, all contained data of related objects will be serialized (json,xml)
-* *virtual* is a configuration option which allows us to define closures with custom serialization behavior (json,xml)
-* *serializer* unlike *virtual* which will create completely new property, this configuration options allows us to customize serialization output for existing property
+* *serializer* is a configuration option which allows us to define closures with custom serialization behavior. This configuration options allows us to customize serialization output for existing property (json,xml)
+* *virtual* unlike *serializer* which will create completely new property
 * *ignore* is a comma separated list of properties which should be ignored during serialization process (json,xml)
 
 
@@ -316,3 +316,24 @@ which will be than used as follows
 	
 ```
 
+###Example serializer and virtual use
+
+``` groovy
+class Author {
+    static marshalling={
+		specialReport{
+			serializer{  // cusomtize the name output to all caps for our 'special report'
+				 name { value, json -> json.value("${value.name.toUpperCase()}") }
+			}
+			virtual{     // add a virtual property, in this case a date/time stamp
+                time { value, json -> json.value("${new Date()}") }
+            }
+		}	
+	}
+     
+    String name
+    Date dob
+    List books
+}
+
+```
