@@ -64,6 +64,20 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		m.id!=null
 	}
 
+    def "putting a property to a list of includes should supress other properties serialization"(){
+        given:
+        Invoice.marshalling = { include 'name' }
+        initialize()
+        when:
+        def	j=new JSON(invoice)
+        def m=JSON.parse(j.toString())
+        then:
+        m.name!=null
+        m.admin==null
+        m.created==null
+        m.id!=null
+    }
+
 	def "setting shouldOutputClass and shouldOutputVersion to true should output class and version info"(){
 		given:
 		Invoice.marshalling = {

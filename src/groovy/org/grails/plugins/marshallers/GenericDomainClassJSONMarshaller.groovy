@@ -71,86 +71,16 @@ class GenericDomainClassJSONMarshaller implements ObjectMarshaller<JSON> {
 
 		GrailsDomainClassProperty[] properties = domainClass.getPersistentProperties()
 
-		for (GrailsDomainClassProperty property : properties) {
-			if(!mc.ignore?.contains(property.getName())){
-				writer.key(property.getName())
-				if(mc.serializer?.containsKey(property.getName())){
-					mc.serializer[property.getName()].call(value,writer)
-				}
-				else{
-					if (!property.isAssociation()) {
-						// Write non-relation property
-						Object val = beanWrapper.getPropertyValue(property.getName())
-						json.convertAnother(val)
-					}
-					else {
-						Object referenceObject = beanWrapper.getPropertyValue(property.getName())
-						if (mc.deep?.contains(property.getName())) {
-							if (referenceObject == null) {
-								writer.value(null)
-							}
-							else {
-								referenceObject = proxyHandler.unwrapIfProxy(referenceObject)
-								if (referenceObject instanceof SortedMap) {
-									referenceObject = new TreeMap((SortedMap) referenceObject)
-								}
-								else if (referenceObject instanceof SortedSet) {
-									referenceObject = new TreeSet((SortedSet) referenceObject)
-								}
-								else if (referenceObject instanceof Set) {
-									referenceObject = new HashSet((Set) referenceObject)
-								}
-								else if (referenceObject instanceof Map) {
-									referenceObject = new HashMap((Map) referenceObject)
-								}
-								else if (referenceObject instanceof Collection) {
-									referenceObject = new ArrayList((Collection) referenceObject)
-								}
-								json.convertAnother(referenceObject)
-							}
-						}
-						else {
-							if (referenceObject == null) {
-								json.value(null)
-							}
-							else {
-								GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
+        boolean includeMode = false
+        if(mc.include?.size() > 0)
+            includeMode = true
 
-								// Embedded are now always fully rendered
-								if (referencedDomainClass == null || property.isEmbedded() || GCU.isJdk5Enum(property.getType())) {
-									json.convertAnother(referenceObject)
-								}
-								else if (property.isOneToOne() || property.isManyToOne() || property.isEmbedded()) {
-									asShortObject(referenceObject, json, referencedDomainClass.getIdentifier(), referencedDomainClass)
-								}
-								else {
-									GrailsDomainClassProperty referencedIdProperty = referencedDomainClass.getIdentifier()
-									@SuppressWarnings("unused")
-											String refPropertyName = referencedDomainClass.getPropertyName()
-									if (referenceObject instanceof Collection) {
-										Collection o = (Collection) referenceObject
-										writer.array()
-										for (Object el : o) {
-											asShortObject(el, json, referencedIdProperty, referencedDomainClass)
-										}
-										writer.endArray()
-									}
-									else if (referenceObject instanceof Map) {
-										Map<Object, Object> map = (Map<Object, Object>) referenceObject
-										for (Map.Entry<Object, Object> entry : map.entrySet()) {
-											String key = String.valueOf(entry.getKey())
-											Object o = entry.getValue()
-											writer.object()
-											writer.key(key)
-											asShortObject(o, json, referencedIdProperty, referencedDomainClass)
-											writer.endObject()
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+		for (GrailsDomainClassProperty property : properties) {
+            if(includeMode && mc.include?.contains(property.getName())) {
+                serializeProperty(property, mc, beanWrapper, json, writer, value)
+            }
+            else if(!includeMode && !mc.ignore?.contains(property.getName())) {
+                serializeProperty(property, mc, beanWrapper, json, writer, value)
 			}
 		}
 
@@ -161,6 +91,88 @@ class GenericDomainClassJSONMarshaller implements ObjectMarshaller<JSON> {
 
 		writer.endObject()
 	}
+
+    protected void serializeProperty(GrailsDomainClassProperty property, MarshallingConfig mc,
+                                     BeanWrapper beanWrapper, JSON json, JSONWriter writer, def value) {
+        writer.key(property.getName())
+        if(mc.serializer?.containsKey(property.getName())){
+            mc.serializer[property.getName()].call(value,writer)
+        }
+        else{
+            if (!property.isAssociation()) {
+                // Write non-relation property
+                Object val = beanWrapper.getPropertyValue(property.getName())
+                json.convertAnother(val)
+            }
+            else {
+                Object referenceObject = beanWrapper.getPropertyValue(property.getName())
+                if (mc.deep?.contains(property.getName())) {
+                    if (referenceObject == null) {
+                        writer.value(null)
+                    }
+                    else {
+                        referenceObject = proxyHandler.unwrapIfProxy(referenceObject)
+                        if (referenceObject instanceof SortedMap) {
+                            referenceObject = new TreeMap((SortedMap) referenceObject)
+                        }
+                        else if (referenceObject instanceof SortedSet) {
+                            referenceObject = new TreeSet((SortedSet) referenceObject)
+                        }
+                        else if (referenceObject instanceof Set) {
+                            referenceObject = new HashSet((Set) referenceObject)
+                        }
+                        else if (referenceObject instanceof Map) {
+                            referenceObject = new HashMap((Map) referenceObject)
+                        }
+                        else if (referenceObject instanceof Collection) {
+                            referenceObject = new ArrayList((Collection) referenceObject)
+                        }
+                        json.convertAnother(referenceObject)
+                    }
+                }
+                else {
+                    if (referenceObject == null) {
+                        json.value(null)
+                    }
+                    else {
+                        GrailsDomainClass referencedDomainClass = property.getReferencedDomainClass()
+
+                        // Embedded are now always fully rendered
+                        if (referencedDomainClass == null || property.isEmbedded() || GCU.isJdk5Enum(property.getType())) {
+                            json.convertAnother(referenceObject)
+                        }
+                        else if (property.isOneToOne() || property.isManyToOne() || property.isEmbedded()) {
+                            asShortObject(referenceObject, json, referencedDomainClass.getIdentifier(), referencedDomainClass)
+                        }
+                        else {
+                            GrailsDomainClassProperty referencedIdProperty = referencedDomainClass.getIdentifier()
+                            @SuppressWarnings("unused")
+                            String refPropertyName = referencedDomainClass.getPropertyName()
+                            if (referenceObject instanceof Collection) {
+                                Collection o = (Collection) referenceObject
+                                writer.array()
+                                for (Object el : o) {
+                                    asShortObject(el, json, referencedIdProperty, referencedDomainClass)
+                                }
+                                writer.endArray()
+                            }
+                            else if (referenceObject instanceof Map) {
+                                Map<Object, Object> map = (Map<Object, Object>) referenceObject
+                                for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                                    String key = String.valueOf(entry.getKey())
+                                    Object o = entry.getValue()
+                                    writer.object()
+                                    writer.key(key)
+                                    asShortObject(o, json, referencedIdProperty, referencedDomainClass)
+                                    writer.endObject()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 	
 	protected void asShortObject(Object refObj, JSON json, GrailsDomainClassProperty idProperty, GrailsDomainClass referencedDomainClass) throws ConverterException {
 		Object idValue

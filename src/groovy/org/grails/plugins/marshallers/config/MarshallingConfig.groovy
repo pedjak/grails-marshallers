@@ -26,6 +26,10 @@ class MarshallingConfig {
 	 * list of field names which will be ignored during serialization
 	 */
 	List ignore
+    /**
+     * exclusive list of field names which will be included during serialization (mutually exclusive with "ignore")
+     */
+    List include
 	/**
 	 * configuration option allows us to define closures with custom serialization behavior
 	 */
