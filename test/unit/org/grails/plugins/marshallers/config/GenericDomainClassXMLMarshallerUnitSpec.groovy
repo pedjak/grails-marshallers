@@ -43,7 +43,7 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		invoice.save()
 	}
 
-	def "setting shouldOutputIdentifier to false should supress output of identifier"(){
+	def "setting shouldOutputIdentifier to false should suppress output of identifier"(){
 		given:
 		Invoice.marshalling = { shouldOutputIdentifier false }
 		initialize()
@@ -55,7 +55,7 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		!m.id.text()
 	}
 
-	def "putting a property to a list of ignores should supress property serialization"(){
+	def "putting a property to a list of ignores should suppress property serialization"(){
 		given:
 		Invoice.marshalling = { ignore 'admin','created' }
 		initialize()
@@ -67,6 +67,20 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		!m.created.text()
 		m.@id.text()
 	}
+
+    def "putting a property to a list of includes should suppress other properties serialization"(){
+        given:
+        Invoice.marshalling = { include 'name' }
+        initialize()
+        when:
+        def	j=new XML(invoice)
+        def m=new XmlSlurper().parseText(j.toString())
+        then:
+        m.name.text()
+        !m.admin.text()
+        !m.created.text()
+        m.@id.text()
+    }
 	
 	def "putting a property to a list of attributes output value as attribute"(){
 		given:
