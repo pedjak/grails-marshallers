@@ -39,7 +39,7 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		invoice.save()
 	}
 
-	def "setting shouldOutputIdentifier to false should supress output of identifier"(){
+	def "setting shouldOutputIdentifier to false should suppress output of identifier"(){
 		given:
 		Invoice.marshalling = { shouldOutputIdentifier false }
 		initialize()
@@ -51,7 +51,7 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		m.id==null
 	}
 
-	def "putting a property to a list of ignores should supress property serialization"(){
+	def "putting a property to a list of ignores should suppress property serialization"(){
 		given:
 		Invoice.marshalling = { ignore 'admin','created' }
 		initialize()
@@ -63,6 +63,20 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		m.created==null
 		m.id!=null
 	}
+
+    def "putting a property to a list of includes should suppress other properties serialization"(){
+        given:
+        Invoice.marshalling = { include 'name' }
+        initialize()
+        when:
+        def	j=new JSON(invoice)
+        def m=JSON.parse(j.toString())
+        then:
+        m.name!=null
+        m.admin==null
+        m.created==null
+        m.id!=null
+    }
 
 	def "setting shouldOutputClass and shouldOutputVersion to true should output class and version info"(){
 		given:

@@ -12,7 +12,7 @@ class MarshallingConfigBuilder {
 	}
 	
 	MarshallingConfigBuilder(MarshallingConfig c){
-		['clazz', 'deep','identifier','elementName','attribute','virtual','shouldOutputIdentifier','shouldOutputClass','shouldOutputVersion','ignore'].each{p->
+		['clazz','deep','identifier','elementName','attribute','virtual','shouldOutputIdentifier','shouldOutputClass','shouldOutputVersion','ignore','include'].each{p->
 			if(c[p]!=null){
 				config[p]=c[p]
 			}
@@ -41,6 +41,9 @@ class MarshallingConfigBuilder {
 	void ignore(String... args){
 		config.ignore=args as List
 	}
+    void include(String... args){
+        config.include=args as List
+    }
 	void virtual(Closure arg){
 		VirtualPropertiesBuilder builder=new VirtualPropertiesBuilder()
 		arg.delegate=builder

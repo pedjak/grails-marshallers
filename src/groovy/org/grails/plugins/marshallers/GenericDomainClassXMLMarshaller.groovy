@@ -97,11 +97,16 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 			}
 		}
 
+        boolean includeMode = false
+        if(mc.include?.size() > 0)
+            includeMode = true
 
 		GrailsDomainClassProperty[] properties = domainClass.getPersistentProperties()
 
 		for (GrailsDomainClassProperty property : properties) {
-			if(!mc.identifier?.contains(property.getName()) && !mc.ignore?.contains(property.getName()) && !mc.attribute?.contains(property.getName())){
+			if(!mc.identifier?.contains(property.getName()) && !mc.attribute?.contains(property.getName()) &&
+                    (!includeMode && !mc.ignore?.contains(property.getName())
+                    || includeMode && mc.include?.contains(property.getName())) ){
 				def serializers=mc?.serializer
 				Object val = beanWrapper.getPropertyValue(property.getName())
 				if(serializers && serializers[property.name]){

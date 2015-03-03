@@ -255,6 +255,7 @@ Within the marshalling configuration closure there are several configuration opt
 * *serializer* is a configuration option which allows us to define closures with custom serialization behavior. This configuration options allows us to customize serialization output for existing property (json,xml)
 * *virtual* unlike *serializer* which will create completely new property
 * *ignore* is a comma separated list of properties which should be ignored during serialization process (json,xml)
+* *include* is an exclusive comma separated list of properties which will be included, meaning properties not listed will not be included (except for those specified using the should* options, or in case of XML, those listed as *attribute* or *identifier*). The *include* and *ignore* options are mutually exclusive - if both are defined, include takes priority (json,xml)
 
 
 ###Named and marshaller specific configuration
