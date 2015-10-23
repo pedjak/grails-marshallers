@@ -114,7 +114,7 @@ class GenericDomainClassXMLMarshaller implements ObjectMarshaller<XML>,NameAware
 					serializers[property.name].call(val,xml)
 					xml.end()
 				}else{
-					if(val){
+					if(val != null){
 						if (log.debugEnabled) log.debug("Trying to write field as xml element: $property.name on $value")
 						writeElement(xml, property, beanWrapper,mc)
 					}
