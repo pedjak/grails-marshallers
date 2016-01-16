@@ -17,3 +17,4 @@ target
 /plugin.xml
 out/
 .DS_Store
+build

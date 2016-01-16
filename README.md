@@ -323,8 +323,11 @@ which will be than used as follows
 class Author {
     static marshalling={
 		specialReport{
-			serializer{  // cusomtize the name output to all caps for our 'special report'
+			serializer{  // customize the name output to all caps for our 'special report'
 				 name { value, json -> json.value("${value.name.toUpperCase()}") }
+				 //it is also possible to pass the marshalling context map as a parameter of virtual property
+                 //value would be put to map as GenericDomainClassJSONMarshaller.marshallingContext.myCtxKey="context value"
+                 ctxName { value, json,ctx -> json.value(ctx.myCtxKey) }
 			}
 			virtual{     // add a virtual property, in this case a date/time stamp
                 time { value, json -> json.value("${new Date()}") }

@@ -7,6 +7,8 @@ import grails.test.mixin.*
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
+import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller
+import org.grails.plugins.marshallers.GenericDomainClassXMLMarshaller
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
 import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller
 import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
@@ -139,6 +141,23 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
 		def m=new XmlSlurper().parseText(j.toString())
 		then:
 		m.custom.text()=='custom value'
+	}
+
+	def "specifying virtual property with context passed should output value"(){
+		given:
+		GenericDomainClassXMLMarshaller.marshallingContext.myCtx='context value'
+		Invoice.marshalling = {
+			virtual{
+				custom {value,xml,ctx-> xml.convertAnother('context value')		}
+			}
+		}
+		initialize()
+		when:
+		def	j=new XML(invoice)
+		println j.toString()
+		def m=new XmlSlurper().parseText(j.toString())
+		then:
+		m.custom.text()=='context value'
 	}
 
 	def "specifying serializer should output customly serialized property value"(){

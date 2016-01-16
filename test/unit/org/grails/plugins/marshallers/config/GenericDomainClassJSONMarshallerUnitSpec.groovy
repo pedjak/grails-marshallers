@@ -4,7 +4,8 @@ import grails.persistence.Entity
 import grails.test.mixin.*
 
 import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer;
-import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer;
+import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
+import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller;
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
 import org.grails.plugins.marshallers.XmlMarshallerArtefactHandler
 import org.grails.plugins.marshallers.test.MarshallerUnitSpecMixin
@@ -13,7 +14,7 @@ import spock.lang.Shared;
 import spock.lang.Specification
 
 /**
- * 
+ *
  * @author dhalupa
  *
  */
@@ -108,6 +109,22 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		m.custom=='custom value'
 	}
 
+	def "specifying virtual property with context passed should output value"(){
+		given:
+        GenericDomainClassJSONMarshaller.marshallingContext.myCtx='context value'
+		Invoice.marshalling = {
+			virtual{
+				custom {value,json,ctx-> json.value(ctx.myCtx)		}
+			}
+		}
+		initialize()
+		when:
+		def	j=new JSON(invoice)
+		def m=JSON.parse(j.toString())
+		then:
+		m.custom=='context value'
+	}
+
 	def "specifying serializer should output customly serialized property value"(){
 		given:
 		Invoice.marshalling = {
@@ -136,14 +153,14 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		m.items[1].name
 		m.items[0].amount
 	}
-	
-	
+
+
 	def "named configuration should use default config on association unless specified"(){
 		given:
 		Invoice.marshalling = {
-			named{ 
+			named{
 				deep 'items'
-			} 
+			}
 		}
 		initialize()
 		when:
@@ -158,7 +175,7 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		m.items[1].name
 		m.items[0].amount
 	}
-	
+
 	def "named configuration should use named config on association if specified"(){
 		given:
 		Invoice.marshalling = {
@@ -184,7 +201,7 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 		!m.items[1].name
 		m.items[0].amount
 	}
-	
+
 	private def initialize(){
 		grailsApplication.mainContext.convertersConfigurationInitializer.initialize(grailsApplication)
 		grailsApplication.mainContext.extendedConvertersConfigurationInitializer.initialize()
