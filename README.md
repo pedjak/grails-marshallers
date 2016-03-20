@@ -5,7 +5,15 @@ Custom Grails XML and JSON Marshallers
 The development of this plugin has been inspired by [this blog post](http://jwicz.wordpress.com/2011/07/11/grails-custom-xml-marshaller/)
 and a need to use custom marshallers - mostly by REST services whose responses must fulfill already defined formats.
 
-The plugin is trying to address the following two issues 
+The plugin is trying to address the following two issues
+Change log
+----------
+### 0.7
+ * Added a new include option (allow only specific properties - issue #12)
+ * Added marshalling context as an additional argument to virtual property closure. See the test for the example of usage
+ * Minor fixes and documentation updates
+ 
+
 
 [Creating and Registering Custom Marshallers](#creating-and-registering-custom-marshallers)
 
