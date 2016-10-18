@@ -1,21 +1,16 @@
 package org.grails.plugins.marshallers.config
-import grails.converters.JSON
+
 import grails.converters.XML
-import grails.persistence.Entity
 import grails.test.mixin.*
 
 import org.grails.web.converters.configuration.ConvertersConfigurationInitializer
 import org.grails.web.converters.exceptions.ConverterException
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
-import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller
 import org.grails.plugins.marshallers.GenericDomainClassXMLMarshaller
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
 import org.grails.web.converters.marshaller.NameAwareMarshaller
 import org.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.plugins.marshallers.XmlMarshallerArtefactHandler
-import org.grails.plugins.marshallers.test.MarshallerUnitSpecMixin
-
-import spock.lang.Shared
 import spock.lang.Specification
 /**
  * 
@@ -364,7 +359,7 @@ class GenericDomainClassXMLMarshallerUnitSpec extends Specification {
     }
     
 	private def initialize(){
-		grailsApplication.mainContext.convertersConfigurationInitializer.initialize(grailsApplication)
+		grailsApplication.mainContext.convertersConfigurationInitializer.initialize()
 		grailsApplication.mainContext.extendedConvertersConfigurationInitializer.initialize()
 	}
 }

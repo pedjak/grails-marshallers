@@ -8,9 +8,6 @@ import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
 import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller;
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
 import org.grails.plugins.marshallers.XmlMarshallerArtefactHandler
-import org.grails.plugins.marshallers.test.MarshallerUnitSpecMixin
-
-import spock.lang.Shared;
 import spock.lang.Specification
 
 /**
@@ -203,7 +200,7 @@ class GenericDomainClassJSONMarshallerUnitSpec extends Specification {
 	}
 
 	private def initialize(){
-		grailsApplication.mainContext.convertersConfigurationInitializer.initialize(grailsApplication)
+		grailsApplication.mainContext.convertersConfigurationInitializer.initialize()
 		grailsApplication.mainContext.extendedConvertersConfigurationInitializer.initialize()
 	}
 }

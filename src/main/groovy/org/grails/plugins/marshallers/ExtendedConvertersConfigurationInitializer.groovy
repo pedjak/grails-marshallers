@@ -21,6 +21,7 @@ import grails.converters.XML
 import grails.core.GrailsApplication
 import grails.util.GrailsClassUtils as GCU
 import grails.core.support.proxy.ProxyHandler
+import groovy.util.logging.Log4j
 import org.grails.web.converters.configuration.ConvertersConfigurationHolder
 import org.grails.web.converters.configuration.DefaultConverterConfiguration
 import org.grails.plugins.marshallers.config.MarshallingConfig
@@ -34,6 +35,7 @@ import grails.util.GrailsClassUtils
  * @author Predrag Knezevic
  * @version $Date: $
  */
+@Log4j
 class ExtendedConvertersConfigurationInitializer implements ApplicationContextAware {
 
     private ApplicationContext applicationContext
