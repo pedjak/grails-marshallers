@@ -16,9 +16,9 @@ package org.grails.plugins.marshallers
  ******************************************************************************/
 
 import grails.plugins.Plugin
-import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU;
-import org.codehaus.groovy.grails.support.proxy.DefaultProxyHandler;
-import org.codehaus.groovy.grails.support.proxy.ProxyHandler;
+import grails.util.GrailsClassUtils as GCU;
+import grails.core.support.proxy.DefaultProxyHandler;
+import grails.core.support.proxy.ProxyHandler;
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
 import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller;
 import org.grails.plugins.marshallers.GenericDomainClassXMLMarshaller;

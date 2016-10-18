@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.grails.plugins.marshallers;
 
-import org.codehaus.groovy.grails.commons.ArtefactHandlerAdapter;
+import grails.core.ArtefactHandlerAdapter;
 
 /**
  * @author Predrag Knezevic

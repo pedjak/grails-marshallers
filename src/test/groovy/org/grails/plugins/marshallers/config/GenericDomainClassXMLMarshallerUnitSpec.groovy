@@ -4,14 +4,14 @@ import grails.converters.XML
 import grails.persistence.Entity
 import grails.test.mixin.*
 
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.configuration.ConvertersConfigurationInitializer
+import org.grails.web.converters.exceptions.ConverterException
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
 import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller
 import org.grails.plugins.marshallers.GenericDomainClassXMLMarshaller
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
-import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller
-import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
+import org.grails.web.converters.marshaller.NameAwareMarshaller
+import org.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.plugins.marshallers.XmlMarshallerArtefactHandler
 import org.grails.plugins.marshallers.test.MarshallerUnitSpecMixin
 

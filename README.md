@@ -55,7 +55,7 @@ and we need to serialize the fields as XML attributes.
 
 here is the marshaller that does this for us:
 ```groovy
-	import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
+	import org.grails.web.converters.marshaller.ObjectMarshaller
 	class AXmlMarshaller implements ObjectMarshaller<XML> {
 		boolean supports(Object object) {
 			A.isAssignableFrom(object.class) 
@@ -78,7 +78,7 @@ that can be hierarchical as well. Imagine that you need to serialize in some cas
 A with "foo" content only. Let us register the appropriate marshaller 
 in the configuration entitled 'restricted':
 ```groovy
-	import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
+	import org.grails.web.converters.marshaller.ObjectMarshaller
 	class AXmlMarshaller implements ObjectMarshaller<XML> {
 	
 		static configuration = "restricted"

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.grails.plugins.marshallers;
 
-import org.codehaus.groovy.grails.commons.InjectableGrailsClass;
+import grails.core.InjectableGrailsClass;
 import org.springframework.beans.BeanWrapper;
 
 /**

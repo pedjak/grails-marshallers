@@ -3,17 +3,17 @@ package org.grails.plugins.marshallers
 import grails.converters.XML
 import groovy.util.logging.Log4j
 
-import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClassUtils as GCU
-import org.codehaus.groovy.grails.commons.GrailsDomainClass
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
-import org.codehaus.groovy.grails.support.proxy.EntityProxyHandler
-import org.codehaus.groovy.grails.support.proxy.ProxyHandler
-import org.codehaus.groovy.grails.web.converters.ConverterUtil
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.converters.marshaller.NameAwareMarshaller
-import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
+import org.grails.core.artefact.DomainClassArtefactHandler
+import grails.core.GrailsApplication
+import grails.util.GrailsClassUtils as GCU
+import grails.core.GrailsDomainClass
+import grails.core.GrailsDomainClassProperty
+import grails.core.support.proxy.EntityProxyHandler
+import grails.core.support.proxy.ProxyHandler
+import org.grails.web.converters.ConverterUtil
+import org.grails.web.converters.exceptions.ConverterException
+import org.grails.web.converters.marshaller.NameAwareMarshaller
+import org.grails.web.converters.marshaller.ObjectMarshaller
 import org.grails.plugins.marshallers.config.MarshallingConfig
 import org.grails.plugins.marshallers.config.MarshallingConfigPool
 import org.springframework.beans.BeanWrapper

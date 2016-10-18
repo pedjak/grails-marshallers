@@ -3,7 +3,7 @@ import grails.converters.JSON
 import grails.persistence.Entity
 import grails.test.mixin.*
 
-import org.codehaus.groovy.grails.web.converters.configuration.ConvertersConfigurationInitializer;
+import org.grails.web.converters.configuration.ConvertersConfigurationInitializer;
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer
 import org.grails.plugins.marshallers.GenericDomainClassJSONMarshaller;
 import org.grails.plugins.marshallers.JsonMarshallerArtefactHandler
