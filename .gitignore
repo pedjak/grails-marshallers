@@ -18,3 +18,5 @@ target
 out/
 .DS_Store
 build
+.gradle/
+build/

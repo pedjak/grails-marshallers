@@ -8,10 +8,8 @@ and a need to use custom marshallers - mostly by REST services whose responses m
 The plugin is trying to address the following two issues
 Change log
 ----------
-### 0.7
- * Added a new include option (allow only specific properties - issue #12)
- * Added marshalling context as an additional argument to virtual property closure. See the test for the example of usage
- * Minor fixes and documentation updates
+### 1.0.0-SNAPSHOT
+ * Migrated plugin from 1.3.7 to 3.0.2
  
 
 
@@ -39,6 +37,7 @@ Installation
 ------------
 * For apps using Grails version <= 2.2.x -> compile ":marshallers:0.4"
 * For apps using Grails version >= 2.3.x -> compile ":marshallers:0.6"
+* For apps using Grails version >= 3.0.2 -> compile ":marshallers:1.0.0-SNAPSHOT"
 
  
 Creating and Registering Custom Marshallers
@@ -55,7 +54,7 @@ and we need to serialize the fields as XML attributes.
 
 here is the marshaller that does this for us:
 ```groovy
-	import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
+	import org.grails.web.converters.marshaller.ObjectMarshaller
 	class AXmlMarshaller implements ObjectMarshaller<XML> {
 		boolean supports(Object object) {
 			A.isAssignableFrom(object.class) 
@@ -78,7 +77,7 @@ that can be hierarchical as well. Imagine that you need to serialize in some cas
 A with "foo" content only. Let us register the appropriate marshaller 
 in the configuration entitled 'restricted':
 ```groovy
-	import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller
+	import org.grails.web.converters.marshaller.ObjectMarshaller
 	class AXmlMarshaller implements ObjectMarshaller<XML> {
 	
 		static configuration = "restricted"
