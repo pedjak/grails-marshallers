@@ -1,4 +1,4 @@
-package org.grails.plugins.marshallers.test
+package org.grails.plugins.marshallers.config
 
 import org.grails.web.converters.configuration.ConvertersConfigurationInitializer;
 import org.grails.plugins.marshallers.ExtendedConvertersConfigurationInitializer;
@@ -15,7 +15,7 @@ class MarshallerUnitSpecMixin extends GrailsUnitTestMixin{
 	def setup(){
 		// this has to be called first as there's no declarative way to enforce
 		// execution order
-		initGrailsApplication()
+//		initGrailsApplication()
 
 		grailsApplication.registerArtefactHandler(new JsonMarshallerArtefactHandler())
 		grailsApplication.registerArtefactHandler(new XmlMarshallerArtefactHandler())
@@ -23,7 +23,7 @@ class MarshallerUnitSpecMixin extends GrailsUnitTestMixin{
 			convertersConfigurationInitializer(ConvertersConfigurationInitializer)
 			extendedConvertersConfigurationInitializer(ExtendedConvertersConfigurationInitializer)
 		}
-		applicationContext.convertersConfigurationInitializer.initialize(grailsApplication)
+		applicationContext.convertersConfigurationInitializer.initialize()
 		applicationContext.extendedConvertersConfigurationInitializer.initialize()
 	}
 
