@@ -68,7 +68,7 @@ dependencies {
     testCompile "org.grails:grails-plugin-testing"
 
     console "org.grails:grails-console"
-    compile "org.grails.plugins:joda-time:2.0.0-SNAPSHOT"
+    compile 'org.grails:grails-datastore-rest-client:5.0.0.RC2'
 }
 
 task wrapper(type: Wrapper) {
