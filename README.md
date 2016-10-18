@@ -8,10 +8,8 @@ and a need to use custom marshallers - mostly by REST services whose responses m
 The plugin is trying to address the following two issues
 Change log
 ----------
-### 0.7
- * Added a new include option (allow only specific properties - issue #12)
- * Added marshalling context as an additional argument to virtual property closure. See the test for the example of usage
- * Minor fixes and documentation updates
+### 1.0.0-SNAPSHOT
+ * Migrated plugin from 1.3.7 to 3.0.2
  
 
 
@@ -39,6 +37,7 @@ Installation
 ------------
 * For apps using Grails version <= 2.2.x -> compile ":marshallers:0.4"
 * For apps using Grails version >= 2.3.x -> compile ":marshallers:0.6"
+* For apps using Grails version >= 3.0.2 -> compile ":marshallers:1.0.0-SNAPSHOT"
 
  
 Creating and Registering Custom Marshallers
