@@ -9,7 +9,7 @@ buildscript {
     }
 }
 
-version "0.1"
+version "1.0.0"
 group "grails.marshallers"
 
 apply plugin:"eclipse"
